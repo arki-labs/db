@@ -6,7 +6,7 @@
  *
  *   export type { UserId, OrgId, AssetId } from '@arki/contracts';
  *
- * See docs/superpowers/specs/2026-05-16-arki-offline-design.md §3.3.
+ * See packages/offline/docs/2026-05-16-arki-offline-design.md §3.3.
  */
 export type {};
 //# sourceMappingURL=ids.d.ts.map

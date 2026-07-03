@@ -1,10 +1,10 @@
 /**
  * DOT adapter for `@arki/db`.
  *
- * Wraps the Drizzle database initialization as a `DotPip`. The pip
+ * Wraps the Drizzle database initialization as a DOT pip. The pip
  * opens a database connection in `boot`, publishes the Drizzle handle as
  * `services.db`, and tears down the underlying client in `dispose`
- * (reverse-topological order).
+ * (reverse declaration order).
  *
  * Two drivers are supported:
  *   - `'pg'` (default) — `node-postgres` pool. Reads `DB_URL` and the
@@ -33,6 +33,16 @@
  *   .boot();
  * ```
  *
+ * To mount a second database scope (e.g. primary + reporting) in the same
+ * app, rename the published wire key at the mount site:
+ *
+ * ```ts
+ * import { rename } from '@arki/dot';
+ *
+ * .use(db({ relations }))
+ * .use(rename(db({ driver: 'pglite', memory: true, relations }), { db: 'reportsDb' }, 'reports-db'))
+ * ```
+ *
  * The `@arki/dot` package is an OPTIONAL peer of `@arki/db`. Importing
  * this adapter without `@arki/dot` installed will fail at module load —
  * that is intentional: the adapter only makes sense in a DOT app.
@@ -40,8 +50,19 @@
 import type { AnyRelations, Logger } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { PgliteDatabase } from 'drizzle-orm/pglite';
-import { type DotPip } from '@arki/dot/pip';
-import { type PgliteInitOptions } from './runtime-local.js';
+import type { EmptyShape, Pip } from '@arki/dot/pip';
+import type { PgliteInitOptions } from './runtime-local.js';
+/**
+ * Stable error codes thrown by the db pip. Exported so consumers and
+ * coding agents can match against them — never parse the message.
+ *
+ * @see packages/dot/docs/principles.md — principle 1.3 ("errors are part
+ * of the API") and principle 4 ("agent-discoverable everywhere").
+ */
+export declare const DB_PIP_ERROR_CODES: {
+    /** boot was called without a configured DB_URL (pg driver). */
+    readonly dbUrlNotConfigured: "DB_PIP_E001";
+};
 /**
  * Common options shared by all DB driver variants.
  */
@@ -50,11 +71,6 @@ type BaseDbDotOptions<TRelations extends AnyRelations> = {
     readonly relations: TRelations;
     /** Drizzle logger override — `true`/`false` or a custom `Logger` instance. */
     readonly logger?: boolean | Logger;
-    /**
-     * Pip name override. Defaults to `'db'`. Use this only when composing
-     * multiple database scopes inside the same app (e.g. primary + reporting).
-     */
-    readonly name?: string;
 };
 /** Options for the node-postgres driver (the default). */
 export type PgDbDotOptions<TRelations extends AnyRelations> = BaseDbDotOptions<TRelations> & {
@@ -78,10 +94,10 @@ export type DbServices<TRelations extends AnyRelations, TDriver extends 'pg' | '
 };
 /**
  * Build a DOT pip that opens a Drizzle database and publishes it as
- * a service. The kernel calls `dispose` in reverse-topological order to
+ * a service. The kernel calls `dispose` in reverse declaration order to
  * close the underlying pool / PGlite instance.
  */
-export declare function db<TRelations extends AnyRelations>(options: PgDbDotOptions<TRelations>): DotPip<DbServices<TRelations, 'pg'>>;
-export declare function db<TRelations extends AnyRelations>(options: PgliteDbDotOptions<TRelations>): DotPip<DbServices<TRelations, 'pglite'>>;
+export declare function db<TRelations extends AnyRelations>(options: PgDbDotOptions<TRelations>): Pip<EmptyShape, DbServices<TRelations, 'pg'>>;
+export declare function db<TRelations extends AnyRelations>(options: PgliteDbDotOptions<TRelations>): Pip<EmptyShape, DbServices<TRelations, 'pglite'>>;
 export {};
 //# sourceMappingURL=dot.d.ts.map

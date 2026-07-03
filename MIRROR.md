@@ -1,6 +1,6 @@
 # @arki/db
 
-Published version: **0.1.0**
+Published version: **0.1.1**
 
 This repository is a **read-only mirror** of the [@arki/db](https://www.npmjs.com/package/@arki/db) npm package.
 

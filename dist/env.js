@@ -1,11 +1,7 @@
-import { createEnv } from '@t3-oss/env-core';
+import { defineEnv } from '@arki/env/core';
 import { z } from '@arki/contracts';
-export const env = createEnv({
-    onValidationError(issues) {
-        console.error('❌ [@arki/db] Invalid environment variables:\n' +
-            issues.map(i => `  ${(i.path ?? []).join('.')}: ${i.message}`).join('\n'));
-        throw new Error('Invalid environment variables');
-    },
+export const env = defineEnv({
+    name: '@arki/db',
     /**
      * Environment variables schema for database services (PostgreSQL)
      */
@@ -13,7 +9,9 @@ export const env = createEnv({
         // General Configuration
         NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
         // Database Connection - Primary method (connection string)
-        // Either DB_URL must be provided (validated after env creation)
+        // DB_URL is the canonical @arki/db name. DATABASE_URL (PG/Coolify/12-factor
+        // standard) is also accepted as a fallback via the runtimeEnv alias below,
+        // which resolves to this same `env.DB_URL` field so consumers don't change.
         DB_URL: z.url(),
         // Database Connection - Individual parameters (alternative to DB_URL)
         PGUSER: z.string().optional(),
@@ -52,7 +50,11 @@ export const env = createEnv({
      */
     runtimeEnv: {
         NODE_ENV: process.env['NODE_ENV'],
-        DB_URL: process.env['DB_URL'],
+        // Resolve from `DB_URL` (canonical) first, falling back to `DATABASE_URL`
+        // (PG/Coolify/12-factor standard) so deployments using the standard name
+        // still work. Closes the silent divergence between app schemas keyed on
+        // DATABASE_URL and this package's DB_URL schema.
+        DB_URL: process.env['DB_URL'] ?? process.env['DATABASE_URL'],
         PGUSER: process.env['PGUSER'],
         PGPASSWORD: process.env['PGPASSWORD'],
         PGHOST: process.env['PGHOST'],
@@ -72,6 +74,8 @@ export const env = createEnv({
         DB_SEED_ON_START: process.env['DB_SEED_ON_START'],
         DB_DROP_ON_START: process.env['DB_DROP_ON_START'],
     },
-    skipValidation: !!process.env['SKIP_ENV_VALIDATION'] || !!process.env['CI'] || process.env['NODE_ENV'] === 'test',
+    options: {
+        skipValidation: !!process.env['SKIP_ENV_VALIDATION'] || !!process.env['CI'] || process.env['NODE_ENV'] === 'test',
+    },
 });
 //# sourceMappingURL=env.js.map
