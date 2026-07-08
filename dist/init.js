@@ -21,4 +21,5 @@ export const initDbWithOptions = (poolConfig, config) => {
 };
 export { createDb } from './factory.js';
 export { getDbConnectionOptions, getDbConnectionParams } from './connection-options.js';
+export { DB_COMPOSITION_ERROR_CODES, DbCompositionError, composeSchema, createUnitOfWork, } from './composition.js';
 //# sourceMappingURL=init.js.map

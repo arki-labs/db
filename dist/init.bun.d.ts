@@ -22,4 +22,6 @@ export declare const initDbWithOptions: <TRelations extends AnyRelations>(poolCo
 };
 export { createDb } from './factory.js';
 export { getDbConnectionOptions, getDbConnectionParams } from './connection-options.js';
+export { DB_COMPOSITION_ERROR_CODES, DbCompositionError, composeSchema, createUnitOfWork, } from './composition.js';
+export type { ComposedSchema, TransactionalDb, UnitOfWork, UnitOfWorkScopes, } from './composition.js';
 //# sourceMappingURL=init.bun.d.ts.map

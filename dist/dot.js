@@ -1,7 +1,7 @@
 /**
  * DOT adapter for `@arki/db`.
  *
- * Wraps the Drizzle database initialization as a DOT pip. The pip
+ * Wraps the Drizzle database initialization as a DOT plugin. The plugin
  * opens a database connection in `boot`, publishes the Drizzle handle as
  * `services.db`, and tears down the underlying client in `dispose`
  * (reverse declaration order).
@@ -47,20 +47,20 @@
  * this adapter without `@arki/dot` installed will fail at module load —
  * that is intentional: the adapter only makes sense in a DOT app.
  */
-import { pip, DotPipError } from '@arki/dot/pip';
+import { plugin, DotPluginError } from '@arki/dot/plugin';
 import { env } from './env.js';
 import { createDb } from './factory.js';
 import { initDbRuntimeLocal } from './runtime-local.js';
 /**
- * Stable error codes thrown by the db pip. Exported so consumers and
+ * Stable error codes thrown by the db plugin. Exported so consumers and
  * coding agents can match against them — never parse the message.
  *
  * @see packages/dot/docs/principles.md — principle 1.3 ("errors are part
  * of the API") and principle 4 ("agent-discoverable everywhere").
  */
-export const DB_PIP_ERROR_CODES = {
+export const DB_PLUGIN_ERROR_CODES = {
     /** boot was called without a configured DB_URL (pg driver). */
-    dbUrlNotConfigured: 'DB_PIP_E001',
+    dbUrlNotConfigured: 'DB_PLUGIN_E001',
 };
 export function db(options) {
     const driver = options.driver ?? 'pg';
@@ -71,7 +71,7 @@ export function db(options) {
         // it deterministically. `services.db` is the Drizzle handle only —
         // exposing the PGlite client would leak driver-specific surface.
         let pgliteHandle;
-        return pip({
+        return plugin({
             name: 'db',
             version: '0.1.0',
             configure(ctx) {
@@ -97,23 +97,23 @@ export function db(options) {
     // Node-postgres path: createDb already reads env vars and constructs the
     // pool. Drizzle owns the pool — closing it goes via the `$client.end()`
     // path that node-postgres exposes through Drizzle's handle.
-    return pip({
+    return plugin({
         name: 'db',
         version: '0.1.0',
         configure(ctx) {
             ctx.registerService('db', 'db');
         },
         boot() {
-            // Validate at the pip boundary so the DOT lifecycle gets a coded
+            // Validate at the plugin boundary so the DOT lifecycle gets a coded
             // error. `createDb` still throws raw `Error` for non-DOT consumers
             // (its public contract is unchanged); the check here makes sure we
             // never reach it without a URL.
             if (env.DB_URL === undefined || env.DB_URL === '') {
-                throw new DotPipError({
-                    code: DB_PIP_ERROR_CODES.dbUrlNotConfigured,
+                throw new DotPluginError({
+                    code: DB_PLUGIN_ERROR_CODES.dbUrlNotConfigured,
                     message: '[db] DB_URL is not configured.',
-                    remediation: 'Set DB_URL in the environment before booting the app, or switch the pip to the pglite driver for in-process databases.',
-                    docsUrl: 'https://arki.dev/dot/errors/db-pip-e001',
+                    remediation: 'Set DB_URL in the environment before booting the app, or switch the plugin to the pglite driver for in-process databases.',
+                    docsUrl: 'https://arki.dev/dot/errors/db-plugin-e001',
                 });
             }
             const handle = createDb({

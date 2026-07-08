@@ -1,7 +1,7 @@
 /**
  * DOT adapter for `@arki/db`.
  *
- * Wraps the Drizzle database initialization as a DOT pip. The pip
+ * Wraps the Drizzle database initialization as a DOT plugin. The plugin
  * opens a database connection in `boot`, publishes the Drizzle handle as
  * `services.db`, and tears down the underlying client in `dispose`
  * (reverse declaration order).
@@ -50,18 +50,18 @@
 import type { AnyRelations, Logger } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { PgliteDatabase } from 'drizzle-orm/pglite';
-import type { EmptyShape, Pip } from '@arki/dot/pip';
+import type { EmptyShape, Plugin } from '@arki/dot/plugin';
 import type { PgliteInitOptions } from './runtime-local.js';
 /**
- * Stable error codes thrown by the db pip. Exported so consumers and
+ * Stable error codes thrown by the db plugin. Exported so consumers and
  * coding agents can match against them — never parse the message.
  *
  * @see packages/dot/docs/principles.md — principle 1.3 ("errors are part
  * of the API") and principle 4 ("agent-discoverable everywhere").
  */
-export declare const DB_PIP_ERROR_CODES: {
+export declare const DB_PLUGIN_ERROR_CODES: {
     /** boot was called without a configured DB_URL (pg driver). */
-    readonly dbUrlNotConfigured: "DB_PIP_E001";
+    readonly dbUrlNotConfigured: "DB_PLUGIN_E001";
 };
 /**
  * Common options shared by all DB driver variants.
@@ -93,11 +93,11 @@ export type DbServices<TRelations extends AnyRelations, TDriver extends 'pg' | '
     readonly db: TDriver extends 'pglite' ? PgliteDatabase<TRelations> : NodePgDatabase<TRelations>;
 };
 /**
- * Build a DOT pip that opens a Drizzle database and publishes it as
+ * Build a DOT plugin that opens a Drizzle database and publishes it as
  * a service. The kernel calls `dispose` in reverse declaration order to
  * close the underlying pool / PGlite instance.
  */
-export declare function db<TRelations extends AnyRelations>(options: PgDbDotOptions<TRelations>): Pip<EmptyShape, DbServices<TRelations, 'pg'>>;
-export declare function db<TRelations extends AnyRelations>(options: PgliteDbDotOptions<TRelations>): Pip<EmptyShape, DbServices<TRelations, 'pglite'>>;
+export declare function db<TRelations extends AnyRelations>(options: PgDbDotOptions<TRelations>): Plugin<EmptyShape, DbServices<TRelations, 'pg'>>;
+export declare function db<TRelations extends AnyRelations>(options: PgliteDbDotOptions<TRelations>): Plugin<EmptyShape, DbServices<TRelations, 'pglite'>>;
 export {};
 //# sourceMappingURL=dot.d.ts.map
