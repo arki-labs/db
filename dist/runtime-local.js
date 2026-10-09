@@ -24,6 +24,7 @@ export async function initDbRuntimeLocal(options, config) {
     const db = drizzle({
         client: pglite,
         relations: config.relations,
+        ...(config.logger === undefined ? {} : { logger: config.logger }),
     });
     debugInit('[runtime-local] Drizzle database initialized');
     return { db, pglite };

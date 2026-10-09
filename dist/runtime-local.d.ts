@@ -1,4 +1,4 @@
-import type { AnyRelations } from 'drizzle-orm';
+import type { AnyRelations, Logger } from 'drizzle-orm';
 import { PGlite, type Extension } from '@electric-sql/pglite';
 import { type PgliteDatabase } from 'drizzle-orm/pglite';
 export type PgliteInitOptions = {
@@ -23,6 +23,8 @@ export type PgliteInitOptions = {
  */
 export declare function initDbRuntimeLocal<TRelations extends AnyRelations>(options: PgliteInitOptions, config: {
     relations: TRelations;
+    /** Drizzle logger override — `true`/`false` or a custom `Logger`, same as the pg driver. */
+    logger?: boolean | Logger | undefined;
 }): Promise<{
     db: PgliteDatabase<TRelations>;
     pglite: PGlite;

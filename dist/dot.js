@@ -82,7 +82,10 @@ export function db(options) {
                     ...(pgliteOptions.dataDir === undefined ? {} : { dataDir: pgliteOptions.dataDir }),
                     ...(pgliteOptions.memory === undefined ? {} : { memory: pgliteOptions.memory }),
                     ...(pgliteOptions.extensions === undefined ? {} : { extensions: pgliteOptions.extensions }),
-                }, { relations: pgliteOptions.relations });
+                }, {
+                    relations: pgliteOptions.relations,
+                    ...(pgliteOptions.logger === undefined ? {} : { logger: pgliteOptions.logger }),
+                });
                 pgliteHandle = pglite;
                 return { db: handle };
             },
