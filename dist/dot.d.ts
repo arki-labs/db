@@ -52,6 +52,7 @@ import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { PgliteDatabase } from 'drizzle-orm/pglite';
 import type { EmptyShape, Plugin } from '@arki/dot/plugin';
 import type { PgliteInitOptions } from './runtime-local.js';
+import type { MigratableDb, MigrateDbOptions } from './migrate.js';
 /**
  * Stable error codes thrown by the db plugin. Exported so consumers and
  * coding agents can match against them — never parse the message.
@@ -61,7 +62,7 @@ import type { PgliteInitOptions } from './runtime-local.js';
  */
 export declare const DB_PLUGIN_ERROR_CODES: {
     /** boot was called without a configured DB_URL (pg driver). */
-    readonly dbUrlNotConfigured: 'DB_PLUGIN_E001';
+    readonly dbUrlNotConfigured: 'ARKI_DB_PLUGIN_E001';
 };
 /**
  * Common options shared by all DB driver variants.
@@ -99,5 +100,12 @@ export type DbServices<TRelations extends AnyRelations, TDriver extends 'pg' | '
  */
 export declare function db<TRelations extends AnyRelations>(options: PgDbDotOptions<TRelations>): Plugin<EmptyShape, DbServices<TRelations, 'pg'>>;
 export declare function db<TRelations extends AnyRelations>(options: PgliteDbDotOptions<TRelations>): Plugin<EmptyShape, DbServices<TRelations, 'pglite'>>;
+/**
+ * DOT plugin: migrate during `boot`, after the `db` plugin and before any
+ * plugin that reads tables. Needs the `db` service; provides nothing.
+ */
+export declare function dbMigrations<TRelations extends AnyRelations = AnyRelations>(options: MigrateDbOptions): Plugin<{
+    readonly db: MigratableDb<TRelations>;
+}, Record<never, never>>;
 export {};
 //# sourceMappingURL=dot.d.ts.map

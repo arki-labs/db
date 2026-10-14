@@ -1,6 +1,6 @@
 /**
  * Apply Drizzle migrations to a handle opened by `@arki/db`, whichever driver
- * produced it, plus a DOT plugin that does so at boot.
+ * produced it. The DOT plugin that does so at boot is `dbMigrations` in `@arki/db/dot`.
  *
  * Why this lives here and not in each app: consumers must not import the
  * drizzle migrator modules themselves. Outside the monorepo that pulls a second
@@ -14,8 +14,7 @@
  *
  * @example
  * ```ts
- * import { db } from '@arki/db/dot';
- * import { dbMigrations } from '@arki/db/migrate';
+ * import { db, dbMigrations } from '@arki/db/dot';
  *
  * defineApp('shop')
  *   .use(db({ driver: 'pglite', dataDir: './.local/db', relations }))
@@ -27,7 +26,6 @@ import type { AnyRelations } from 'drizzle-orm';
 import type { MigrationMeta } from 'drizzle-orm/migrator';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { PgliteDatabase } from 'drizzle-orm/pglite';
-import type { Plugin } from '@arki/dot/plugin';
 /** Any handle the `db` plugin publishes. */
 export type MigratableDb<TRelations extends AnyRelations = AnyRelations> = NodePgDatabase<TRelations> | PgliteDatabase<TRelations>;
 /** One migration as drizzle's migrator consumes it. Re-exported so apps can type a generated module. */
@@ -55,11 +53,4 @@ export declare function readMigrations(migrationsFolder: string): MigrationMeta[
  * helpers merely wrap with `readMigrationFiles`.
  */
 export declare function migrateDb<TRelations extends AnyRelations>(db: MigratableDb<TRelations>, options: MigrateDbOptions): Promise<void>;
-/**
- * DOT plugin: migrate during `boot`, after the `db` plugin and before any
- * plugin that reads tables. Needs the `db` service; provides nothing.
- */
-export declare function dbMigrations<TRelations extends AnyRelations = AnyRelations>(options: MigrateDbOptions): Plugin<{
-    readonly db: MigratableDb<TRelations>;
-}, Record<never, never>>;
 //# sourceMappingURL=migrate.d.ts.map

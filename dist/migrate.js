@@ -1,6 +1,5 @@
 import { readMigrationFiles } from 'drizzle-orm/migrator';
 import { migrate } from 'drizzle-orm/pg-core';
-import { plugin, service } from '@arki/dot/plugin';
 import { debugInit } from './debug.js';
 /** Read a `drizzle-kit generate` folder into the in-memory form. Build-time helper. */
 export function readMigrations(migrationsFolder) {
@@ -22,19 +21,5 @@ export async function migrateDb(db, options) {
         migrationsSchema: options.migrationsSchema ?? 'drizzle',
     });
     debugInit.debug('[migrate] migrations applied');
-}
-/**
- * DOT plugin: migrate during `boot`, after the `db` plugin and before any
- * plugin that reads tables. Needs the `db` service; provides nothing.
- */
-export function dbMigrations(options) {
-    return plugin({
-        name: 'db-migrations',
-        version: '0.1.0',
-        needs: { db: service() },
-        async boot({ db }) {
-            await migrateDb(db, options);
-        },
-    });
 }
 //# sourceMappingURL=migrate.js.map

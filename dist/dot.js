@@ -47,9 +47,10 @@
  * this adapter without `@arki/dot` installed will fail at module load —
  * that is intentional: the adapter only makes sense in a DOT app.
  */
-import { plugin, DotPluginError } from '@arki/dot/plugin';
+import { plugin, service, DotPluginError } from '@arki/dot/plugin';
 import { env } from './env.js';
 import { createDb } from './factory.js';
+import { migrateDb } from './migrate.js';
 import { initDbRuntimeLocal } from './runtime-local.js';
 /**
  * Stable error codes thrown by the db plugin. Exported so consumers and
@@ -60,7 +61,7 @@ import { initDbRuntimeLocal } from './runtime-local.js';
  */
 export const DB_PLUGIN_ERROR_CODES = {
     /** boot was called without a configured DB_URL (pg driver). */
-    dbUrlNotConfigured: 'DB_PLUGIN_E001',
+    dbUrlNotConfigured: 'ARKI_DB_PLUGIN_E001',
 };
 export function db(options) {
     const driver = options.driver ?? 'pg';
@@ -116,7 +117,7 @@ export function db(options) {
                     code: DB_PLUGIN_ERROR_CODES.dbUrlNotConfigured,
                     message: '[db] DB_URL is not configured.',
                     remediation: 'Set DB_URL in the environment before booting the app, or switch the plugin to the pglite driver for in-process databases.',
-                    docsUrl: 'https://arki.dev/dot/errors/db-plugin-e001',
+                    docsUrl: 'https://arki.dev/dot/errors/arki-db-plugin-e001',
                 });
             }
             const handle = createDb({
@@ -132,6 +133,20 @@ export function db(options) {
             if (pgHandle.$client !== undefined) {
                 await pgHandle.$client.end();
             }
+        },
+    });
+}
+/**
+ * DOT plugin: migrate during `boot`, after the `db` plugin and before any
+ * plugin that reads tables. Needs the `db` service; provides nothing.
+ */
+export function dbMigrations(options) {
+    return plugin({
+        name: 'db-migrations',
+        version: '0.1.0',
+        needs: { db: service() },
+        async boot({ db }) {
+            await migrateDb(db, options);
         },
     });
 }
