@@ -61,7 +61,7 @@ import type { PgliteInitOptions } from './runtime-local.js';
  */
 export declare const DB_PLUGIN_ERROR_CODES: {
     /** boot was called without a configured DB_URL (pg driver). */
-    readonly dbUrlNotConfigured: "DB_PLUGIN_E001";
+    readonly dbUrlNotConfigured: 'DB_PLUGIN_E001';
 };
 /**
  * Common options shared by all DB driver variants.

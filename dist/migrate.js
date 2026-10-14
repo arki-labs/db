@@ -13,7 +13,7 @@ export function readMigrations(migrationsFolder) {
  */
 export async function migrateDb(db, options) {
     const migrations = options.migrations === undefined ? readMigrations(options.migrationsFolder) : [...options.migrations];
-    debugInit('[migrate] applying %d migration(s)', migrations.length);
+    debugInit.debug('[migrate] applying {migrationsLength} migration(s)', { migrationsLength: migrations.length });
     await migrate(migrations, db, {
         // Drizzle's config type requires the folder even though this step only
         // reads the table/schema names; the list above is already in memory.
@@ -21,7 +21,7 @@ export async function migrateDb(db, options) {
         migrationsTable: options.migrationsTable ?? '__drizzle_migrations',
         migrationsSchema: options.migrationsSchema ?? 'drizzle',
     });
-    debugInit('[migrate] migrations applied');
+    debugInit.debug('[migrate] migrations applied');
 }
 /**
  * DOT plugin: migrate during `boot`, after the `db` plugin and before any

@@ -15,18 +15,16 @@ import { debugInit } from './debug.js';
  */
 export async function initDbRuntimeLocal(options, config) {
     const url = options.memory === true ? 'memory://' : (options.dataDir ?? './.local/db');
-    debugInit('[runtime-local] Initializing PGlite at: %s', url);
-    const pglite = options.extensions
-        ? new PGlite(url, { extensions: options.extensions })
-        : new PGlite(url);
+    debugInit.debug('[runtime-local] Initializing PGlite at: {url}', { url });
+    const pglite = options.extensions ? new PGlite(url, { extensions: options.extensions }) : new PGlite(url);
     await pglite.waitReady;
-    debugInit('[runtime-local] PGlite ready');
+    debugInit.debug('[runtime-local] PGlite ready');
     const db = drizzle({
         client: pglite,
         relations: config.relations,
         ...(config.logger === undefined ? {} : { logger: config.logger }),
     });
-    debugInit('[runtime-local] Drizzle database initialized');
+    debugInit.debug('[runtime-local] Drizzle database initialized');
     return { db, pglite };
 }
 //# sourceMappingURL=runtime-local.js.map

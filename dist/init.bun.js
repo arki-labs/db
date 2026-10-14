@@ -1,16 +1,22 @@
-import { drizzle } from 'drizzle-orm/bun-sql/postgres';
 import { SQL } from 'bun';
+import { drizzle } from 'drizzle-orm/bun-sql/postgres';
 import { debugInit } from './debug.js';
-debugInit('[init.bun] Using Bun SQL (native) for database connections');
+debugInit.debug('[init.bun] Using Bun SQL (native) for database connections');
 export const initDb = (connectionString, config) => {
-    debugInit('[init.bun] Initializing database with connection string (logger: %s)', !!config.logger);
+    debugInit.debug('[init.bun] Initializing database with connection string (logger: {logger})', {
+        logger: !!config.logger,
+    });
     const client = new SQL(connectionString);
     const db = drizzle({ ...config, client });
-    debugInit('[init.bun] Database initialized successfully');
+    debugInit.debug('[init.bun] Database initialized successfully');
     return db;
 };
 export const initDbWithOptions = (poolConfig, config) => {
-    debugInit('[init.bun] Initializing database with pool config (min: %d, max: %d, logger: %s)', poolConfig.min ?? 0, poolConfig.max ?? 10, !!config.logger);
+    debugInit.debug('[init.bun] Initializing database with pool config (min: {min}, max: {max}, logger: {logger})', {
+        min: poolConfig.min ?? 0,
+        max: poolConfig.max ?? 10,
+        logger: !!config.logger,
+    });
     const client = poolConfig.connectionString
         ? new SQL(poolConfig.connectionString)
         : new SQL({
@@ -21,10 +27,10 @@ export const initDbWithOptions = (poolConfig, config) => {
             password: poolConfig.password,
         });
     const db = drizzle({ ...config, client });
-    debugInit('[init.bun] Database initialized with custom pool configuration');
+    debugInit.debug('[init.bun] Database initialized with custom pool configuration');
     return db;
 };
 export { createDb } from './factory.js';
 export { getDbConnectionOptions, getDbConnectionParams } from './connection-options.js';
-export { DB_COMPOSITION_ERROR_CODES, DbCompositionError, composeSchema, createUnitOfWork, } from './composition.js';
+export { DB_COMPOSITION_ERROR_CODES, DbCompositionError, composeSchema, createUnitOfWork } from './composition.js';
 //# sourceMappingURL=init.bun.js.map

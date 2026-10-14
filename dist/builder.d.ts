@@ -1,7 +1,7 @@
 import type { AnyRelations } from 'drizzle-orm';
-import { defineRelations } from 'drizzle-orm';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { PoolConfig } from 'pg';
+import { defineRelations } from 'drizzle-orm';
 /**
  * Projection middleware context
  */

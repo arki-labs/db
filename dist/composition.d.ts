@@ -1,11 +1,16 @@
 export declare const DB_COMPOSITION_ERROR_CODES: {
-    readonly duplicateSchemaKey: "DB_COMPOSITION_E001";
+    readonly duplicateSchemaKey: 'DB_COMPOSITION_E001';
+    readonly projectionNameMissing: 'DB_COMPOSITION_E002';
+    readonly projectionEventsMissing: 'DB_COMPOSITION_E003';
 };
 export declare class DbCompositionError extends Error {
     readonly code: (typeof DB_COMPOSITION_ERROR_CODES)[keyof typeof DB_COMPOSITION_ERROR_CODES];
+    /** How to fix the declaration. Shown by `dot explain` when the import fails. */
+    readonly remediation: string | undefined;
     constructor(args: {
         readonly code: (typeof DB_COMPOSITION_ERROR_CODES)[keyof typeof DB_COMPOSITION_ERROR_CODES];
         readonly message: string;
+        readonly remediation?: string;
     });
 }
 type SchemaSlice = Record<string, unknown>;

@@ -1,6 +1,7 @@
+import type { Extension } from '@electric-sql/pglite';
 import type { AnyRelations, Logger } from 'drizzle-orm';
-import { PGlite, type Extension } from '@electric-sql/pglite';
-import { type PgliteDatabase } from 'drizzle-orm/pglite';
+import type { PgliteDatabase } from 'drizzle-orm/pglite';
+import { PGlite } from '@electric-sql/pglite';
 export type PgliteInitOptions = {
     /** Path to the PGlite data directory. Defaults to `./.local/db`. */
     dataDir?: string;

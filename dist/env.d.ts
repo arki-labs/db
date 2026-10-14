@@ -1,12 +1,12 @@
 export declare const env: Readonly<{
-    PGUSER?: string | undefined;
-    PGPASSWORD?: string | undefined;
-    PGDATABASE?: string | undefined;
     NODE_ENV: "development" | "production" | "test";
     DB_URL: string;
+    PGUSER?: string | undefined;
+    PGPASSWORD?: string | undefined;
     PGHOST: string;
     PGPORT: number;
-    PGSSLMODE: "disable" | "allow" | "prefer" | "require" | "verify-ca" | "verify-full";
+    PGDATABASE?: string | undefined;
+    PGSSLMODE: "allow" | "disable" | "prefer" | "require" | "verify-ca" | "verify-full";
     DB_POOL_MIN: number;
     DB_POOL_MAX: number;
     DB_POOL_IDLE_TIMEOUT: number;

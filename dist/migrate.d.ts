@@ -27,7 +27,7 @@ import type { AnyRelations } from 'drizzle-orm';
 import type { MigrationMeta } from 'drizzle-orm/migrator';
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import type { PgliteDatabase } from 'drizzle-orm/pglite';
-import { type Plugin } from '@arki/dot/plugin';
+import type { Plugin } from '@arki/dot/plugin';
 /** Any handle the `db` plugin publishes. */
 export type MigratableDb<TRelations extends AnyRelations = AnyRelations> = NodePgDatabase<TRelations> | PgliteDatabase<TRelations>;
 /** One migration as drizzle's migrator consumes it. Re-exported so apps can type a generated module. */

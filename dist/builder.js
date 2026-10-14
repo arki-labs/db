@@ -1,4 +1,5 @@
 import { defineRelations } from 'drizzle-orm';
+import { DB_COMPOSITION_ERROR_CODES, DbCompositionError } from './composition.js';
 import { debugProjection } from './debug.js';
 import { initDbWithOptions } from './init.js';
 /**
@@ -28,30 +29,38 @@ class ProjectionBuilderImpl {
         }
     }
     named(name) {
-        debugProjection('[builder] Setting projection name: %s', name);
+        debugProjection.debug('[builder] Setting projection name: {name}', { name });
         this._name = name;
         return this;
     }
     on(eventTypes) {
-        debugProjection('[builder] Registering event types: %o', eventTypes);
+        debugProjection.debug('[builder] Registering event types: {eventTypes}', { eventTypes });
         this._eventTypes = [...eventTypes];
         return this;
     }
     handle(handler) {
         if (!this._name) {
-            debugProjection('[builder] Error: Projection name is required');
-            throw new Error('Projection name is required. Call .named() first.');
+            debugProjection.debug('[builder] Error: Projection name is required');
+            throw new DbCompositionError({
+                code: DB_COMPOSITION_ERROR_CODES.projectionNameMissing,
+                message: 'Projection name is required. Call .named() first.',
+                remediation: 'Call .named("...") before .handle().',
+            });
         }
         if (!this._eventTypes) {
-            debugProjection('[builder] Error: Event types are required');
-            throw new Error('Event types are required. Call .on() first.');
+            debugProjection.debug('[builder] Error: Event types are required');
+            throw new DbCompositionError({
+                code: DB_COMPOSITION_ERROR_CODES.projectionEventsMissing,
+                message: 'Event types are required. Call .on() first.',
+                remediation: 'Call .on(...) with the event types before .handle().',
+            });
         }
         const name = this._name;
         const eventTypes = this._eventTypes;
         const middleware = this._middleware;
         const repos = this.repos;
         const db = this._db;
-        debugProjection('[builder] Creating projection definition (name: %s, eventTypes: %o, middlewareCount: %d)', name, eventTypes, middleware.length);
+        debugProjection.debug('[builder] Creating projection definition (name: {name}, eventTypes: {eventTypes}, middlewareCount: {middlewareLength})', { name, eventTypes, middlewareLength: middleware.length });
         return {
             name,
             canHandle: eventTypes,
@@ -68,12 +77,16 @@ class ProjectionBuilderImpl {
         };
     }
     use(middleware) {
-        debugProjection('[builder] Adding projection middleware (currentCount: %d)', this._middleware.length);
+        debugProjection.debug('[builder] Adding projection middleware (currentCount: {currentCount})', {
+            currentCount: this._middleware.length,
+        });
         const newBuilder = new ProjectionBuilderImpl(this.repos, this._db, [
             ...this._middleware,
             middleware,
         ]);
-        debugProjection('[builder] Middleware added (newCount: %d)', this._middleware.length + 1);
+        debugProjection.debug('[builder] Middleware added (newCount: {newCount})', {
+            newCount: this._middleware.length + 1,
+        });
         return newBuilder;
     }
 }
@@ -88,10 +101,16 @@ class DbBuilderImpl {
         this._repoFactories = repoFactories ?? new Map();
     }
     registerRepository(key, factory) {
-        debugProjection('[builder] Registering repository (key: %s, currentCount: %d)', key, this._repoFactories.size);
+        debugProjection.debug('[builder] Registering repository (key: {key}, currentCount: {currentCount})', {
+            key,
+            currentCount: this._repoFactories.size,
+        });
         const newFactories = new Map(this._repoFactories);
         newFactories.set(key, factory);
-        debugProjection('[builder] Repository registered (key: %s, newCount: %d)', key, newFactories.size);
+        debugProjection.debug('[builder] Repository registered (key: {key}, newCount: {newFactoriesSize})', {
+            key,
+            newFactoriesSize: newFactories.size,
+        });
         return new DbBuilderImpl(this.db, this.isDev, newFactories);
     }
     projectionMiddleware(fn) {
@@ -99,16 +118,18 @@ class DbBuilderImpl {
     }
     get projection() {
         if (!this._repos) {
-            debugProjection('[builder] Initializing repositories from factories (count: %d)', this._repoFactories.size);
+            debugProjection.debug('[builder] Initializing repositories from factories (count: {count})', {
+                count: this._repoFactories.size,
+            });
             const repos = {};
             for (const [key, factory] of this._repoFactories) {
-                debugProjection('[builder] Creating repository: %s', key);
+                debugProjection.debug('[builder] Creating repository: {key}', { key });
                 repos[key] = factory(this.db);
             }
             this._repos = repos;
-            debugProjection('[builder] All repositories initialized');
+            debugProjection.debug('[builder] All repositories initialized');
         }
-        debugProjection('[builder] Creating projection builder');
+        debugProjection.debug('[builder] Creating projection builder');
         return new ProjectionBuilderImpl(this._repos, this.db);
     }
 }
@@ -118,28 +139,31 @@ class SchemaBuilderImpl {
         this.relations = relations;
     }
     create(options) {
-        debugProjection('[builder] Creating database builder (isDev: %s, hasPoolConfig: %s)', options.isDev ?? false, !!options.poolConfig);
+        debugProjection.debug('[builder] Creating database builder (isDev: {isDev}, hasPoolConfig: {hasPoolConfig})', {
+            isDev: options.isDev ?? false,
+            hasPoolConfig: !!options.poolConfig,
+        });
         const poolConfig = {
             connectionString: options.connectionString,
             ...options.poolConfig,
         };
-        debugProjection('[builder] Initializing database with pool config');
+        debugProjection.debug('[builder] Initializing database with pool config');
         const db = initDbWithOptions(poolConfig, {
             relations: this.relations,
             logger: options.isDev,
         });
-        debugProjection('[builder] Database builder created successfully');
+        debugProjection.debug('[builder] Database builder created successfully');
         return new DbBuilderImpl(db, options.isDev ?? false);
     }
 }
 class InitialBuilderImpl {
     schema(schema) {
-        debugProjection('[builder] Setting database schema (deriving relations via defineRelations)');
+        debugProjection.debug('[builder] Setting database schema (deriving relations via defineRelations)');
         const relations = defineRelations(schema);
         return new SchemaBuilderImpl(relations);
     }
     relations(relations) {
-        debugProjection('[builder] Setting database relations (explicit RQBv2)');
+        debugProjection.debug('[builder] Setting database relations (explicit RQBv2)');
         return new SchemaBuilderImpl(relations);
     }
 }

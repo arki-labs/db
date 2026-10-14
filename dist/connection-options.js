@@ -5,7 +5,7 @@ import { env } from './env.js';
  * @returns Connection options object for pg Pool
  */
 export function getDbConnectionOptions() {
-    debugFactory('[factory] Retrieving database connection options from environment');
+    debugFactory.debug('[factory] Retrieving database connection options from environment');
     const connectionUrl = env.DB_URL;
     const options = {
         connectionString: connectionUrl,
@@ -17,7 +17,7 @@ export function getDbConnectionOptions() {
         query_timeout: env.DB_QUERY_TIMEOUT,
         idle_in_transaction_session_timeout: env.DB_IDLE_IN_TRANSACTION_SESSION_TIMEOUT,
     };
-    debugFactory('[factory] Connection options retrieved (hasUrl: %s)', !!connectionUrl);
+    debugFactory.debug('[factory] Connection options retrieved (hasUrl: {hasUrl})', { hasUrl: !!connectionUrl });
     return options;
 }
 /**
@@ -26,7 +26,7 @@ export function getDbConnectionOptions() {
  * @returns Connection parameters object
  */
 export function getDbConnectionParams() {
-    debugFactory('[factory] Retrieving database connection parameters from environment');
+    debugFactory.debug('[factory] Retrieving database connection parameters from environment');
     const params = {
         user: env.PGUSER,
         password: env.PGPASSWORD,
@@ -35,7 +35,7 @@ export function getDbConnectionParams() {
         database: env.PGDATABASE,
         ssl: env.PGSSLMODE === 'disable' ? false : { rejectUnauthorized: env.PGSSLMODE === 'verify-full' },
     };
-    debugFactory('[factory] Connection parameters retrieved (host: %s, port: %d, database: %s, ssl: %s)', params.host, params.port, params.database, env.PGSSLMODE);
+    debugFactory.debug('[factory] Connection parameters retrieved (host: {host}, port: {port}, database: {database}, ssl: {PGSSLMODE})', { host: params.host, port: params.port, database: params.database, PGSSLMODE: env.PGSSLMODE });
     return params;
 }
 //# sourceMappingURL=connection-options.js.map

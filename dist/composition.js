@@ -1,12 +1,17 @@
 export const DB_COMPOSITION_ERROR_CODES = {
     duplicateSchemaKey: 'DB_COMPOSITION_E001',
+    projectionNameMissing: 'DB_COMPOSITION_E002',
+    projectionEventsMissing: 'DB_COMPOSITION_E003',
 };
 export class DbCompositionError extends Error {
     code;
+    /** How to fix the declaration. Shown by `dot explain` when the import fails. */
+    remediation;
     constructor(args) {
         super(args.message);
         this.name = 'DbCompositionError';
         this.code = args.code;
+        this.remediation = args.remediation;
     }
 }
 export function composeSchema(...slices) {
@@ -18,6 +23,7 @@ export function composeSchema(...slices) {
                 throw new DbCompositionError({
                     code: DB_COMPOSITION_ERROR_CODES.duplicateSchemaKey,
                     message: `[db] schema key "${key}" is provided by more than one schema slice.`,
+                    remediation: 'Rename the table in one slice, or remove the slice that repeats it.',
                 });
             }
             seen.add(key);

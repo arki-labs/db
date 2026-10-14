@@ -35,7 +35,7 @@ export declare function createIdFactory<TPrefix extends string, TId extends `${T
      * Creates a new ID with the specified prefix
      */
     new: () => TId;
-    schema: z.ZodPipe<z.ZodString, z.ZodTransform<Awaited<TId>, string>> | z.ZodPipe<z.core.$ZodBranded<z.ZodString, TId, "out">, z.ZodTransform<Awaited<TId>, string & z.core.$brand<TId>>>;
+    schema: z.ZodPipe<z.ZodString, z.ZodTransform<Awaited<TId>, string>> | z.ZodPipe<z.core.$ZodBranded<z.ZodString, TId, "out">, z.ZodTransform<Awaited<TId>, string & z.$brand<TId>>>;
     /**
      * Drizzle column helper for primary key columns
      * Automatically configures as varchar(256), not null, primary key, with proper type and default
@@ -58,14 +58,14 @@ export declare function createIdFactory<TPrefix extends string, TId extends `${T
      * Configures as varchar(256), not null, with proper type and foreign key constraint
      */
     foreignKey: (name: string, referenceFn: () => PgColumn, options?: {
-        onDelete?: "cascade" | "restrict" | "no action" | "set null" | "set default";
+        onDelete?: 'cascade' | 'restrict' | 'no action' | 'set null' | 'set default';
     }) => import("drizzle-orm/pg-core").Set$Type<import("drizzle-orm/pg-core").SetNotNull<import("drizzle-orm/pg-core").PgVarcharBuilder<[string, ...string[]]>>, TId>;
     /**
      * Drizzle column helper for optional foreign key reference with relation
      * Configures as varchar(256), nullable, with proper type and foreign key constraint
      */
     optionalForeignKey: (name: string, referenceFn: () => PgColumn, options?: {
-        onDelete?: "cascade" | "restrict" | "no action" | "set null" | "set default";
+        onDelete?: 'cascade' | 'restrict' | 'no action' | 'set null' | 'set default';
     }) => import("drizzle-orm/pg-core").Set$Type<import("drizzle-orm/pg-core").PgVarcharBuilder<[string, ...string[]]>, TId>;
     /**
      * Creates a foreign key factory bound to a specific table
@@ -73,10 +73,10 @@ export declare function createIdFactory<TPrefix extends string, TId extends `${T
      */
     createForeignKeyFactory: (referenceFn: () => PgColumn) => {
         required: (name: string, options?: {
-            onDelete?: "cascade" | "restrict" | "no action" | "set null" | "set default";
+            onDelete?: 'cascade' | 'restrict' | 'no action' | 'set null' | 'set default';
         }) => import("drizzle-orm/pg-core").Set$Type<import("drizzle-orm/pg-core").SetNotNull<import("drizzle-orm/pg-core").PgVarcharBuilder<[string, ...string[]]>>, TId>;
         optional: (name: string, options?: {
-            onDelete?: "cascade" | "restrict" | "no action" | "set null" | "set default";
+            onDelete?: 'cascade' | 'restrict' | 'no action' | 'set null' | 'set default';
         }) => import("drizzle-orm/pg-core").Set$Type<import("drizzle-orm/pg-core").PgVarcharBuilder<[string, ...string[]]>, TId>;
     };
 };

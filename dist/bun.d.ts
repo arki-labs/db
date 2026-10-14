@@ -6,7 +6,7 @@ import type { DrizzlePgConfig } from 'drizzle-orm/pg-core/utils';
  * @param connectionString - PostgreSQL connection string.
  * @param config - Drizzle pg configuration.
  */
-export declare const initDb: <TRelations extends AnyRelations>(connectionString: string, config: Omit<DrizzlePgConfig<TRelations>, "relations"> & {
+export declare const initDb: <TRelations extends AnyRelations>(connectionString: string, config: Omit<DrizzlePgConfig<TRelations>, 'relations'> & {
     relations: TRelations;
 }) => BunSQLDatabase<TRelations>;
 /**
