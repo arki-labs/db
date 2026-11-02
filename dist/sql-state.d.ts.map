@@ -1,0 +1,1 @@
+{"version":3,"file":"sql-state.d.ts","sourceRoot":"","sources":["../src/sql-state.ts"],"names":[],"mappings":"AAAA;;;;;;;;;;;;GAYG;AAyBH,gGAAgG;AAChG,MAAM,MAAM,kBAAkB,GAAG;IAAE,QAAQ,CAAC,QAAQ,EAAE,MAAM,CAAC;IAAC,QAAQ,CAAC,UAAU,EAAE,MAAM,GAAG,SAAS,CAAA;CAAE,CAAC;AAExG;;;;;;;;;GASG;AACH,wBAAgB,iBAAiB,CAAC,KAAK,EAAE,OAAO,GAAG,kBAAkB,GAAG,SAAS,CA0BhF"}

@@ -1,6 +1,5 @@
 export declare const env: Readonly<{
     NODE_ENV: "development" | "production" | "test";
-    DB_URL: string;
     PGUSER?: string | undefined;
     PGPASSWORD?: string | undefined;
     PGHOST: string;
@@ -19,5 +18,7 @@ export declare const env: Readonly<{
     DB_IDLE_IN_TRANSACTION_SESSION_TIMEOUT: number;
     DB_SEED_ON_START: boolean;
     DB_DROP_ON_START: boolean;
+    DB_URL: string;
+    DB_DIRECT_URL?: string | undefined;
 }>;
 //# sourceMappingURL=env.d.ts.map

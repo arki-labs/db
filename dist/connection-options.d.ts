@@ -1,9 +1,5 @@
-/**
- * Get database connection options from environment variables
- * @returns Connection options object for pg Pool
- */
-export declare function getDbConnectionOptions(): {
-    connectionString: string;
+/** The pool settings from the environment, without the URL — readable with no `DB_URL` set. */
+export declare function getPoolOptions(): {
     min: number;
     max: number;
     idleTimeoutMillis: number;
@@ -11,6 +7,20 @@ export declare function getDbConnectionOptions(): {
     statement_timeout: number;
     query_timeout: number;
     idle_in_transaction_session_timeout: number;
+};
+/**
+ * Get database connection options from environment variables
+ * @returns Connection options object for pg Pool
+ */
+export declare function getDbConnectionOptions(): {
+    min: number;
+    max: number;
+    idleTimeoutMillis: number;
+    connectionTimeoutMillis: number;
+    statement_timeout: number;
+    query_timeout: number;
+    idle_in_transaction_session_timeout: number;
+    connectionString: string;
 };
 /**
  * Get individual database connection parameters from environment variables

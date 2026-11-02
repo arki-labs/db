@@ -1,0 +1,299 @@
+[
+  {
+    "code": "ARKI_DB_PLUGIN_E001",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "The `db` factory ran without a database URL: no `url` thunk and no `DB_URL`.",
+    "fix": "Set `DB_URL`, or pass a `url` thunk to `db()`.",
+    "verify": "bun run test -- src/dot.test.ts",
+    "source": "src/dot-errors.ts:28"
+  },
+  {
+    "code": "ARKI_DB_PLUGIN_E002",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "`repos({ withTx })` used `withTx` as a repository name. `withTx` is the helper that rebinds every repos set.",
+    "fix": "Rename the repository.",
+    "verify": "bun run test -- src/repos.test.ts",
+    "source": "src/dot-errors.ts:35"
+  },
+  {
+    "code": "ARKI_DB_PLUGIN_E003",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "`reader(repo, [name])` named something that is not a method of the repository.",
+    "fix": "List only method names of the repository.",
+    "verify": "bun run test -- src/repos.test.ts",
+    "source": "src/dot-errors.ts:42"
+  },
+  {
+    "code": "ARKI_DB_PLUGIN_E004",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "`sessionPool.connect()` ran while `DB_URL` is a known transaction pooler and no direct URL is set. Through the pooler, LISTEN hears nothing and a session lock outlives its owner.",
+    "fix": "Set `DB_DIRECT_URL`, or pass a `directUrl` thunk to `db()`.",
+    "verify": "bun run test -- src/dot.test.ts",
+    "source": "src/dot-errors.ts:50"
+  },
+  {
+    "code": "ARKI_DB_PLUGIN_E005",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "The database URL does not fit the plugin: a `postgres:` URL given to `db()` from `@arki/db/libsql/dot`, or a SQLite URL (`file:`, `libsql:`, `:memory:`) given to the pg driver of `@arki/db/dot`. The wrong driver would fail later, with a less clear error.",
+    "fix": "Use the plugin that matches the URL, or fix the URL.",
+    "verify": "bun run test -- src/dot.test.ts src/libsql/dot.test.ts",
+    "source": "src/dot-errors.ts:59"
+  },
+  {
+    "code": "ARKI_DB_TX_E001",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "Every attempt failed with a retryable SQLSTATE (`40001` or `40P01`).",
+    "fix": "Shorten the transaction, touch rows in a fixed order, or raise `retries` (at most 10).",
+    "verify": "bun run test -- src/transaction.test.ts",
+    "source": "src/transaction-errors.ts:10"
+  },
+  {
+    "code": "ARKI_DB_TX_E002",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "`isolation` is not `serializable`, `retries` is not a whole number from 0 to 10, or an option key is unknown.",
+    "fix": "Fix the options. Nothing is clamped.",
+    "verify": "bun run test -- src/transaction.test.ts",
+    "source": "src/transaction-errors.ts:17"
+  },
+  {
+    "code": "ARKI_DB_TX_E003",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "A transactional procedure was called with a context that is already inside a transaction.",
+    "fix": "Open one transaction per call. Call the usecase directly instead.",
+    "verify": "bun run test -- src/orpc.test.ts",
+    "source": "src/transaction-errors.ts:24"
+  },
+  {
+    "code": "ARKI_DB_TX_E004",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "`transact` is not the last `.use()`, or `implement` was not given `transactionalProcedureConfig`.",
+    "fix": "Put `.use(transact)` last and pass `transactionalProcedureConfig` to `implement`.",
+    "verify": "bun run test -- src/orpc.test.ts",
+    "source": "src/transaction-errors.ts:31"
+  },
+  {
+    "code": "ARKI_DB_TX_E005",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "The transactional handler returned a stream.",
+    "fix": "Return plain data. Stream from another procedure.",
+    "verify": "bun run test -- src/orpc.test.ts",
+    "source": "src/transaction-errors.ts:38"
+  },
+  {
+    "code": "ARKI_DB_TX_E006",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "The database handed to the transaction helper is already a transaction.",
+    "fix": "Pass the root database.",
+    "verify": "bun run test -- src/transaction.test.ts",
+    "source": "src/transaction-errors.ts:45"
+  },
+  {
+    "code": "ARKI_DB_TX_E007",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "The database is SQLite on a driver other than libSQL (bun:sqlite, node:sqlite, better-sqlite3, sqlite-proxy). Those commit when an async callback returns, not when it settles, so a throw after an `await` keeps its writes.",
+    "fix": "Open the database with `createLibsqlDb` from `@arki/db/libsql`, or `db()` from `@arki/db/libsql/dot`.",
+    "verify": "bun run test -- src/transaction.sqlite.test.ts",
+    "source": "src/transaction-errors.ts:53"
+  },
+  {
+    "code": "DB_COMPOSITION_E001",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "Two features export a schema entry under the same key, so one would hide the other.",
+    "fix": "Rename one table or relation export so each key is unique across features.",
+    "verify": "bun run test -- src/composition.test.ts",
+    "source": "src/composition.ts:15"
+  },
+  {
+    "code": "DB_COMPOSITION_E002",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "A projection was declared without a name.",
+    "fix": "Pass a non-empty `name` when you declare the projection.",
+    "verify": "bun run test -- src/composition.test.ts",
+    "source": "src/composition.ts:22"
+  },
+  {
+    "code": "DB_COMPOSITION_E003",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "A projection was declared without the events it reads.",
+    "fix": "List at least one event in the projection `events`.",
+    "verify": "bun run test -- src/composition.test.ts",
+    "source": "src/composition.ts:29"
+  },
+  {
+    "code": "DB_COMPOSITION_E004",
+    "package": "@arki/db",
+    "kind": "thrown",
+    "what": "Two features define a relation under the same key.",
+    "fix": "Rename one relation key so each is unique across features.",
+    "verify": "bun run test -- src/merge-relations.test.ts",
+    "source": "src/composition.ts:36"
+  },
+  {
+    "code": "db.listen_unavailable",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "The first connection or `LISTEN` of a listener failed (no free client, permission denied, no `LISTEN` support). Nothing retries: the start rejects with an `UnexpectedFailure` whose `failure` is this value and whose `cause` is the raw pool error. (`WakeListener` in `@arki/journal` is `Unlisten | Promise<Unlisten>`, so the start cannot return a failure without changing that contract.)",
+    "fix": "Check the pool, the credentials and that the server supports `LISTEN`, then start the listener again.",
+    "verify": "bun run test -- src/pg-listen.test.ts",
+    "source": "src/pg-listen.ts:56"
+  },
+  {
+    "code": "db.local_data_dir_in_use",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "A live process already owns this data directory.",
+    "fix": "Close its existing handle or choose another data directory.",
+    "verify": "bun run test -- src/runtime-local.test.ts",
+    "source": "src/runtime-local-failures.ts:10"
+  },
+  {
+    "code": "db.local_owner_lock_contended",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "The owner lock kept changing throughout the bounded acquisition attempts.",
+    "fix": "Wait for competing openers to finish before opening the directory again.",
+    "verify": "bun run test -- src/owner-lock.test.ts",
+    "source": "src/runtime-local-failures.ts:22"
+  },
+  {
+    "code": "db.local_runtime_cleanup_failed",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "Closing resources or releasing their owner lock could not be confirmed.",
+    "fix": "Inspect the private causes; retain ownership until the handle is confirmed closed.",
+    "verify": "bun run test -- src/runtime-local-cleanup.test.ts",
+    "source": "src/runtime-local-failures.ts:55"
+  },
+  {
+    "code": "db.local_runtime_refused",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "The filesystem rejected the selected local database path or operation.",
+    "fix": "Choose a writable directory with the required filesystem permissions.",
+    "verify": "bun run test -- src/owner-lock.test.ts",
+    "source": "src/runtime-local-failures.ts:44"
+  },
+  {
+    "code": "db.local_runtime_unavailable",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "The filesystem temporarily could not perform the local database operation.",
+    "fix": "Restore filesystem capacity or availability before trying again.",
+    "verify": "bun run test -- src/owner-lock.test.ts",
+    "source": "src/runtime-local-failures.ts:33"
+  },
+  {
+    "code": "db.migration_read_failed",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "Migration source files could not be read or decoded.",
+    "fix": "Inspect the private cause and restore the generated migration directory before running again.",
+    "verify": "bun run test -- src/migrate-outcomes.test.ts",
+    "source": "src/migrate-failures.ts:8"
+  },
+  {
+    "code": "db.migration_state_failed",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "The current migration bookkeeping state could not be read.",
+    "fix": "Restore database access and inspect its bookkeeping before deciding what to apply.",
+    "verify": "bun run test -- src/migrate-outcomes.test.ts",
+    "source": "src/migrate-failures.ts:19"
+  },
+  {
+    "code": "db.migration_unconfirmed",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "The native migrator did not confirm completion; schema or bookkeeping changes may exist.",
+    "fix": "Reconcile the database schema and migration bookkeeping before explicitly running again. Do not retry blindly.",
+    "verify": "bun run test -- src/migrate-outcomes.test.ts",
+    "source": "src/migrate-failures.ts:30"
+  },
+  {
+    "code": "db.session_needs_direct_url",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "A session feature was given a pooled URL and no direct one.",
+    "fix": "Set `DB_DIRECT_URL` (or pass `directUrl`) to the host's direct URL.",
+    "verify": "bun run test -- src/hosts.test.ts",
+    "source": "src/hosts.ts:35"
+  },
+  {
+    "code": "db.stored_value_unreadable",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "A stored value cannot be read as the column's type: Postgres `infinity`, a BC date, malformed text, or SQLite milliseconds that are NaN or out of range. Drizzle's `fromDriver` cannot return a failure, so the column codecs throw this as an `UnexpectedFailure` (`error.failure` is this value); the raw `RangeError` is its `cause`.",
+    "fix": "Repair or remove the stored value, or read the column as text and handle the special value yourself.",
+    "verify": "bun run test -- src/temporal.test.ts",
+    "source": "src/errors.ts:113"
+  },
+  {
+    "code": "db.transaction_cancelled",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "Cancellation stopped work before COMMIT or while waiting for another attempt.",
+    "fix": "Respect the caller cancellation; start a new operation only under a new policy.",
+    "verify": "bun run test -- src/transaction.test.ts",
+    "source": "src/errors.ts:89"
+  },
+  {
+    "code": "db.transaction_commit_uncertain",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "Work completed but the driver did not confirm COMMIT; writes may already be durable.",
+    "fix": "Reconcile using an idempotency key or durable receipt; never blindly repeat the write.",
+    "verify": "bun run test -- src/transaction.pg.test.ts",
+    "source": "src/errors.ts:78"
+  },
+  {
+    "code": "db.transaction_conflict",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "PostgreSQL aborted every allowed attempt with a serialization conflict or deadlock.",
+    "fix": "Shorten transactions or retry the operation later.",
+    "verify": "bun run test -- src/transaction.pg.test.ts",
+    "source": "src/errors.ts:43"
+  },
+  {
+    "code": "db.transaction_defect",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "Transaction work or its driver threw an unclassified defect.",
+    "fix": "Inspect the private cause and fix the failing implementation.",
+    "verify": "bun run test -- src/transaction.test.ts",
+    "source": "src/errors.ts:100"
+  },
+  {
+    "code": "db.transaction_rejected",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "PostgreSQL explicitly rejected a statement or COMMIT, including constraint violations.",
+    "fix": "Correct the write using the SQLSTATE; this does not imply a transient outage.",
+    "verify": "bun run test -- src/transaction.pg.test.ts",
+    "source": "src/errors.ts:66"
+  },
+  {
+    "code": "db.transaction_unavailable",
+    "package": "@arki/db",
+    "kind": "failure",
+    "what": "The driver could not execute the transaction because its connection failed.",
+    "fix": "Inspect the private cause and restore database connectivity.",
+    "verify": "bun run test -- src/transaction.test.ts",
+    "source": "src/errors.ts:55"
+  }
+]

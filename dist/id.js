@@ -1,10 +1,3 @@
-import { createId as createCuid } from '@paralleldrive/cuid2';
-export const createId = () => {
-    return createCuid();
-};
-export const createPrefixedId = (prefix) => {
-    return `${prefix}${createId()}`;
-};
-// Re-export the new ID factory
+/** Legacy IDs and column helpers, with canonical generation failures. */
 export * from './id-factory.js';
 //# sourceMappingURL=id.js.map

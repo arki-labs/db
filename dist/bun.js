@@ -17,15 +17,12 @@ export const initDb = (connectionString, config) => {
 /**
  * Create a database connection using environment configuration with Bun SQL.
  * @param config - Drizzle pg configuration.
- * @throws Error if DB_URL is not configured.
+ * @throws The `@arki/env` validation error naming `DB_URL` when it is missing or not a URL.
  */
 export function createDb(config) {
     debugInit.debug('[bun] Creating database from environment configuration');
+    // `env.DB_URL` is validated (a URL) on first read, so a missing one throws the env validation error naming `DB_URL`.
     const connectionUrl = env.DB_URL;
-    if (!connectionUrl) {
-        debugInit.debug('[bun] Database creation failed: DB_URL not configured');
-        throw new Error('Database URL is not configured. Please set DB_URL environment variable.');
-    }
     const db = initDb(connectionUrl, {
         ...config,
         logger: config.logger ?? (env.DB_LOGGING || env.NODE_ENV === 'development'),

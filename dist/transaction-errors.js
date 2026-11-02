@@ -1,0 +1,75 @@
+export const DB_TRANSACTION_ERROR_CODES = {
+    /**
+     * Every attempt failed with a retryable SQLSTATE (`40001` or `40P01`).
+     *
+     * @fix Shorten the transaction, touch rows in a fixed order, or raise `retries` (at most 10).
+     * @verify bun run test -- src/transaction.test.ts
+     */
+    retriesExhausted: 'ARKI_DB_TX_E001',
+    /**
+     * `isolation` is not `serializable`, `retries` is not a whole number from 0 to 10, or an option key is unknown.
+     *
+     * @fix Fix the options. Nothing is clamped.
+     * @verify bun run test -- src/transaction.test.ts
+     */
+    invalidOptions: 'ARKI_DB_TX_E002',
+    /**
+     * A transactional procedure was called with a context that is already inside a transaction.
+     *
+     * @fix Open one transaction per call. Call the usecase directly instead.
+     * @verify bun run test -- src/orpc.test.ts
+     */
+    nestedTransaction: 'ARKI_DB_TX_E003',
+    /**
+     * `transact` is not the last `.use()`, or `implement` was not given `transactionalProcedureConfig`.
+     *
+     * @fix Put `.use(transact)` last and pass `transactionalProcedureConfig` to `implement`.
+     * @verify bun run test -- src/orpc.test.ts
+     */
+    invalidPipeline: 'ARKI_DB_TX_E004',
+    /**
+     * The transactional handler returned a stream.
+     *
+     * @fix Return plain data. Stream from another procedure.
+     * @verify bun run test -- src/orpc.test.ts
+     */
+    unsupportedOutput: 'ARKI_DB_TX_E005',
+    /**
+     * The database handed to the transaction helper is already a transaction.
+     *
+     * @fix Pass the root database.
+     * @verify bun run test -- src/transaction.test.ts
+     */
+    transactionAsRoot: 'ARKI_DB_TX_E006',
+    /**
+     * The database is SQLite on a driver other than libSQL (bun:sqlite, node:sqlite, better-sqlite3, sqlite-proxy).
+     * Those commit when an async callback returns, not when it settles, so a throw after an `await` keeps its writes.
+     *
+     * @fix Open the database with `createLibsqlDb` from `@arki/db/libsql`, or `db()` from `@arki/db/libsql/dot`.
+     * @verify bun run test -- src/transaction.sqlite.test.ts
+     */
+    unsafeSqliteDriver: 'ARKI_DB_TX_E007',
+};
+/** An error of `@arki/db/transaction` or `@arki/db/orpc`. Same shape as `DbCompositionError`. */
+export class DbTransactionError extends Error {
+    code;
+    /** How to fix it. */
+    remediation;
+    /** How many times the work ran. Set for `retriesExhausted`. */
+    attempts;
+    /** The SQLSTATE of the last failure. Set for `retriesExhausted`. */
+    sqlState;
+    constructor(args) {
+        super(args.message, args.cause === undefined ? undefined : { cause: args.cause });
+        this.name = 'DbTransactionError';
+        this.code = args.code;
+        this.remediation = args.remediation;
+        this.attempts = args.attempts;
+        this.sqlState = args.sqlState;
+    }
+}
+/** True when `error` is a `DbTransactionError`, and has `code` when one is given. */
+export function isDbTransactionError(error, code) {
+    return error instanceof DbTransactionError && (code === undefined || error.code === code);
+}
+//# sourceMappingURL=transaction-errors.js.map

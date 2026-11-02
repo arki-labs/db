@@ -1,6 +1,6 @@
 {
   "name": "@arki/db",
-  "version": "0.3.1",
+  "version": "0.5.1",
   "description": "Drizzle ORM repositories and database helpers for ARKI — Postgres + PGlite runtimes, projection builder, branded ID factory, and env-aware connection pooling.",
   "license": "MIT",
   "repository": {
@@ -84,6 +84,31 @@
       "import": "./dist/pg.js",
       "default": "./dist/pg.js"
     },
+    "./libsql": {
+      "types": "./dist/libsql.d.ts",
+      "import": "./dist/libsql.js",
+      "default": "./dist/libsql.js"
+    },
+    "./libsql/dot": {
+      "types": "./dist/libsql/dot.d.ts",
+      "import": "./dist/libsql/dot.js",
+      "default": "./dist/libsql/dot.js"
+    },
+    "./sqlite": {
+      "types": "./dist/sqlite.d.ts",
+      "import": "./dist/sqlite.js",
+      "default": "./dist/sqlite.js"
+    },
+    "./columns": {
+      "types": "./dist/columns.d.ts",
+      "import": "./dist/columns.js",
+      "default": "./dist/columns.js"
+    },
+    "./dialect": {
+      "types": "./dist/dialect.d.ts",
+      "import": "./dist/dialect.js",
+      "default": "./dist/dialect.js"
+    },
     "./temporal": {
       "types": "./dist/temporal.d.ts",
       "import": "./dist/temporal.js",
@@ -104,6 +129,36 @@
       "import": "./dist/migrate.js",
       "default": "./dist/migrate.js"
     },
+    "./pagination": {
+      "types": "./dist/pagination.d.ts",
+      "import": "./dist/pagination.js",
+      "default": "./dist/pagination.js"
+    },
+    "./transaction": {
+      "types": "./dist/transaction.d.ts",
+      "import": "./dist/transaction.js",
+      "default": "./dist/transaction.js"
+    },
+    "./errors": {
+      "types": "./dist/errors.d.ts",
+      "import": "./dist/errors.js",
+      "default": "./dist/errors.js"
+    },
+    "./contract": {
+      "types": "./dist/contract.d.ts",
+      "import": "./dist/contract.js",
+      "default": "./dist/contract.js"
+    },
+    "./orpc": {
+      "types": "./dist/orpc.d.ts",
+      "import": "./dist/orpc.js",
+      "default": "./dist/orpc.js"
+    },
+    "./eslint": {
+      "types": "./dist/eslint.d.ts",
+      "import": "./dist/eslint.js",
+      "default": "./dist/eslint.js"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -111,19 +166,30 @@
     "src/**",
     "!src/**/*.test.*",
     "!src/**/*.spec.*",
+    "!src/**/*.test-d.ts",
     "!src/**/tests/**",
     "!src/**/test/**",
     "!src/**/__tests__/**",
+    "!src/**/__fixtures__/**",
     "README.md",
+    "llms.txt",
+    "docs/**",
+    "!docs/examples/*.test.ts",
+    "!docs/examples/tsconfig.json",
     "LICENSE",
     "package.json"
   ],
   "dependencies": {
-    "@arki/contracts": "0.1.0",
-    "@arki/date": "0.2.0",
-    "@arki/env": "0.0.11",
-    "@arki/log": "0.1.0",
+    "@arki/clock": "0.2.0",
+    "@arki/contracts": "0.4.1",
+    "@arki/date": "0.5.0",
+    "@arki/env": "0.2.0",
+    "@arki/failure": "0.3.0",
+    "@arki/log": "0.4.0",
+    "@arki/resilience": "0.3.2",
+    "@arki/schema": "0.3.0",
     "@electric-sql/pglite": "^0.4.6",
+    "@opentelemetry/api": "^1.9.1",
     "@paralleldrive/cuid2": "^3.3.0",
     "@t3-oss/env-core": "^0.13.11",
     "drizzle-orm": "1.0.0-rc.4",
@@ -132,10 +198,30 @@
     "zod": "4.6.5"
   },
   "peerDependencies": {
-    "@arki/dot": "^0.6.1"
+    "@arki/dot": "^0.10.0",
+    "@libsql/client": "^0.18.0",
+    "@orpc/server": "^1.15.5",
+    "@typescript-eslint/utils": "^8.0.0",
+    "eslint": ">=9.0.0",
+    "typescript": ">=5.0.0"
   },
   "peerDependenciesMeta": {
     "@arki/dot": {
+      "optional": true
+    },
+    "@libsql/client": {
+      "optional": true
+    },
+    "@orpc/server": {
+      "optional": true
+    },
+    "@typescript-eslint/utils": {
+      "optional": true
+    },
+    "eslint": {
+      "optional": true
+    },
+    "typescript": {
       "optional": true
     }
   },

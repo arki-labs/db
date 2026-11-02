@@ -1,30 +1,108 @@
 import { PGlite } from '@electric-sql/pglite';
 import { drizzle } from 'drizzle-orm/pglite';
+import { isFailure, orThrow } from '@arki/failure';
 import { debugInit } from './debug.js';
+import { acquireOwnerLock, classifyLocalRuntimeFailure, lockableDataDir } from './owner-lock.js';
+import { LocalRuntimeCleanupFailed } from './runtime-local-failures.js';
+import { observeDbOperation } from './runtime-local-telemetry.js';
+export * from './runtime-local-failures.js';
+/** The foreign close method bridges the owned outcome without changing PGlite's API. */
+class LockedPGlite extends PGlite {
+    #release;
+    #closing;
+    constructor(dataDir, options, release) {
+        super(dataDir, options);
+        this.#release = release;
+    }
+    async close() {
+        await orThrow(this.closeOwned());
+    }
+    closeOwned() {
+        if (this.#closing !== undefined)
+            return this.#closing;
+        // Reserve ownership before tracing can reenter; release it only after reporting ends.
+        this.#closing = Promise.resolve()
+            .then(() => observeDbOperation('db.local.close', async () => {
+            try {
+                // A failed driver close may leave a live database. Its lock must remain held.
+                if (!this.closed)
+                    await super.close();
+                return await this.#release();
+            }
+            catch (error) {
+                const failure = classifyLocalRuntimeFailure(error);
+                return LocalRuntimeCleanupFailed.is(failure) ? failure : LocalRuntimeCleanupFailed({ cause: error });
+            }
+        }))
+            .finally(() => {
+            this.#closing = undefined;
+        });
+        return this.#closing;
+    }
+    async cleanupFailedStart() {
+        try {
+            if (this.ready || this.closed)
+                return this.closeOwned();
+            // A rejected waitReady cannot be closed through PGlite's public API.
+            // Extensions may already own resources even before its module exists.
+            return LocalRuntimeCleanupFailed({ cause: new Error('PGlite initialization did not confirm a closable state.') });
+        }
+        catch (error) {
+            return LocalRuntimeCleanupFailed({ cause: error });
+        }
+    }
+}
 /**
  * Initialize a PGlite-backed Drizzle database for embedded local development.
  *
- * Returns the raw PGlite instance alongside the Drizzle handle so callers can
- * share it with `@arki/queue/runtime-local` (one process, one PGlite).
+ * Returns canonical failures, or the Drizzle handle, raw PGlite and owned close.
+ * A file data directory has one owner; a live owner returns DataDirInUse.
+ * Dead owners are reclaimed. Memory and browser storage take no owner lock.
+ * Owned close returns cleanup failures; raw pglite.close keeps PGlite's throwing API.
  *
  * @example
  * ```ts
+ * import { isFailure } from '@arki/failure';
  * import { initDbRuntimeLocal } from '@arki/db/runtime-local';
- * const { db, pglite } = await initDbRuntimeLocal({ dataDir: './.local/db' }, { relations });
+ * const result = await initDbRuntimeLocal({ dataDir: './.local/db' }, { relations });
+ * if (isFailure(result)) return result;
+ * const { db, pglite } = result;
  * ```
  */
 export async function initDbRuntimeLocal(options, config) {
-    const url = options.memory === true ? 'memory://' : (options.dataDir ?? './.local/db');
-    debugInit.debug('[runtime-local] Initializing PGlite at: {url}', { url });
-    const pglite = options.extensions ? new PGlite(url, { extensions: options.extensions }) : new PGlite(url);
-    await pglite.waitReady;
-    debugInit.debug('[runtime-local] PGlite ready');
-    const db = drizzle({
-        client: pglite,
-        relations: config.relations,
-        ...(config.logger === undefined ? {} : { logger: config.logger }),
+    return observeDbOperation('db.local.init', async () => {
+        let pglite;
+        let release;
+        try {
+            const url = options.memory === true ? 'memory://' : (options.dataDir ?? './.local/db');
+            debugInit.debug('[runtime-local] Initializing PGlite at: {url}', { url });
+            const pgliteOptions = options.extensions ? { extensions: options.extensions } : {};
+            const lockDir = lockableDataDir(url);
+            if (lockDir !== null) {
+                const acquired = await observeDbOperation('db.local.acquire', () => acquireOwnerLock(lockDir));
+                if (isFailure(acquired))
+                    return acquired;
+                release = acquired;
+            }
+            pglite = new LockedPGlite(url, pgliteOptions, release ?? (() => Promise.resolve()));
+            await pglite.waitReady;
+            const db = drizzle({
+                client: pglite,
+                relations: config.relations,
+                ...(config.logger === undefined ? {} : { logger: config.logger }),
+            });
+            const handle = pglite;
+            return { db, pglite, close: () => handle.closeOwned() };
+        }
+        catch (error) {
+            const failure = classifyLocalRuntimeFailure(error);
+            const cleanup = pglite === undefined ? await release?.() : await pglite.cleanupFailedStart();
+            if (isFailure(cleanup))
+                return LocalRuntimeCleanupFailed({
+                    cause: new AggregateError([failure, cleanup], 'Local database startup failed and cleanup is unconfirmed.'),
+                });
+            return failure;
+        }
     });
-    debugInit.debug('[runtime-local] Drizzle database initialized');
-    return { db, pglite };
 }
 //# sourceMappingURL=runtime-local.js.map

@@ -1,3 +1,4 @@
+/** The Bun SQL driver entry, used through the `bun` export condition. */
 import type { AnyRelations } from 'drizzle-orm';
 import type { BunSQLDatabase } from 'drizzle-orm/bun-sql/postgres';
 import type { DrizzlePgConfig } from 'drizzle-orm/pg-core/utils';
@@ -12,7 +13,7 @@ export declare const initDb: <TRelations extends AnyRelations>(connectionString:
 /**
  * Create a database connection using environment configuration with Bun SQL.
  * @param config - Drizzle pg configuration.
- * @throws Error if DB_URL is not configured.
+ * @throws The `@arki/env` validation error naming `DB_URL` when it is missing or not a URL.
  */
 export declare function createDb<TRelations extends AnyRelations>(config: Omit<DrizzlePgConfig<TRelations>, 'relations'> & {
     relations: TRelations;

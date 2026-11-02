@@ -11,8 +11,10 @@
  *
  * Both columns declare Drizzle's `:string` codecs, so every driver (node-postgres,
  * postgres.js, PGlite, Bun SQL) hands back Postgres text and one strict parser
- * covers them all. Values Temporal cannot hold (`infinity`, BC dates) throw a
- * `RangeError` instead of becoming a wrong date.
+ * covers them all. Values Temporal cannot hold (`infinity`, BC dates, malformed text)
+ * cannot become a wrong date. Drizzle's `fromDriver` cannot return a failure, so the
+ * codec throws an `UnexpectedFailure` whose `failure` is `StoredValueUnreadable`
+ * (`db.stored_value_unreadable`); never a raw `RangeError`.
  *
  * A raw `sql` selection mapped with `.mapWith(column)` skips the codec, and Bun
  * SQL then returns a `Date`. That is accepted too: Bun reads `timestamptz` as
@@ -79,4 +81,6 @@ export declare const instant: {
         driverParam: string;
     }>;
 };
+/** The builder `instant(name)` returns. */
+export type PgInstantBuilder = ReturnType<typeof instant>;
 //# sourceMappingURL=temporal.d.ts.map

@@ -1,4 +1,3 @@
-export declare const createId: () => string;
-export declare const createPrefixedId: <T extends string>(prefix: T) => `${T}${string}`;
+/** Legacy IDs and column helpers, with canonical generation failures. */
 export * from './id-factory.js';
 //# sourceMappingURL=id.d.ts.map

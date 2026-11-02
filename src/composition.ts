@@ -1,7 +1,39 @@
+import type { PgTransactionConfig } from 'drizzle-orm/pg-core';
+import type { SQLiteTransactionConfig } from 'drizzle-orm/sqlite-core';
+
+import type { TransactionFailure } from './transaction.js';
+import { runTransactionOnce } from './owned-transaction.js';
+import { observeDbOperation } from './runtime-local-telemetry.js';
+
 export const DB_COMPOSITION_ERROR_CODES = {
+  /**
+   * Two features export a schema entry under the same key, so one would hide the other.
+   *
+   * @fix Rename one table or relation export so each key is unique across features.
+   * @verify bun run test -- src/composition.test.ts
+   */
   duplicateSchemaKey: 'DB_COMPOSITION_E001',
+  /**
+   * A projection was declared without a name.
+   *
+   * @fix Pass a non-empty `name` when you declare the projection.
+   * @verify bun run test -- src/composition.test.ts
+   */
   projectionNameMissing: 'DB_COMPOSITION_E002',
+  /**
+   * A projection was declared without the events it reads.
+   *
+   * @fix List at least one event in the projection `events`.
+   * @verify bun run test -- src/composition.test.ts
+   */
   projectionEventsMissing: 'DB_COMPOSITION_E003',
+  /**
+   * Two features define a relation under the same key.
+   *
+   * @fix Rename one relation key so each is unique across features.
+   * @verify bun run test -- src/merge-relations.test.ts
+   */
+  duplicateRelationKey: 'DB_COMPOSITION_E004',
 } as const;
 
 export class DbCompositionError extends Error {
@@ -27,10 +59,10 @@ type UnionToIntersection<T> = (T extends unknown ? (value: T) => void : never) e
   ? I
   : never;
 
-type DuplicateKeys<TSlices extends readonly SchemaSlice[], TSeen extends PropertyKey = never> = TSlices extends readonly [
-  infer Head,
-  ...infer Tail,
-]
+type DuplicateKeys<
+  TSlices extends readonly SchemaSlice[],
+  TSeen extends PropertyKey = never,
+> = TSlices extends readonly [infer Head, ...infer Tail]
   ? Head extends SchemaSlice
     ? Tail extends readonly SchemaSlice[]
       ? (keyof Head & TSeen) | DuplicateKeys<Tail, TSeen | keyof Head>
@@ -67,9 +99,21 @@ export function composeSchema<const TSlices extends readonly SchemaSlice[]>(
   return schema as ComposedSchema<TSlices>;
 }
 
+/**
+ * A database that can open a transaction: Drizzle's `db.transaction(fn, config)`,
+ * on Postgres or SQLite. `config` is one object both dialects read: Postgres its
+ * isolation level (`runTransaction` passes `serializable`), SQLite its `behavior`.
+ * A `transaction` that takes either dialect's config, or none, fits.
+ */
 export type TransactionalDb<TTransaction> = {
-  transaction<TResult>(fn: (tx: TTransaction) => Promise<TResult>): Promise<TResult>;
+  transaction<TResult>(
+    fn: (tx: TTransaction) => Promise<TResult>,
+    config?: TransactionConfig,
+  ): Promise<TResult>;
 };
+
+/** A transaction config every dialect accepts: each driver reads its own keys. */
+export type TransactionConfig = PgTransactionConfig & SQLiteTransactionConfig;
 
 export type UnitOfWorkScopes<TFactories extends Record<string, (tx: never) => unknown>> = {
   readonly [K in keyof TFactories]: ReturnType<TFactories[K]>;
@@ -77,23 +121,22 @@ export type UnitOfWorkScopes<TFactories extends Record<string, (tx: never) => un
 
 export type UnitOfWork<TScopes> = <TResult>(
   fn: (scopes: TScopes) => Promise<TResult> | TResult,
-) => Promise<TResult>;
+) => Promise<TResult | TransactionFailure>;
 
-export function createUnitOfWork<
-  TTransaction,
-  const TFactories extends Record<string, (tx: TTransaction) => unknown>,
->(
+export function createUnitOfWork<TTransaction, const TFactories extends Record<string, (tx: TTransaction) => unknown>>(
   db: TransactionalDb<TTransaction>,
   factories: TFactories,
 ): UnitOfWork<{
   readonly [K in keyof TFactories]: ReturnType<TFactories[K]>;
 }> {
-  return async fn =>
-    db.transaction(async tx => {
-      const scopes: Record<string, unknown> = {};
-      for (const [name, factory] of Object.entries(factories)) {
-        scopes[name] = factory(tx);
-      }
-      return fn(scopes as { readonly [K in keyof TFactories]: ReturnType<TFactories[K]> });
-    });
+  return fn =>
+    observeDbOperation('db.unit_of_work', () =>
+      runTransactionOnce(db, async tx => {
+        const scopes: Record<string, unknown> = {};
+        for (const [name, factory] of Object.entries(factories)) {
+          scopes[name] = factory(tx);
+        }
+        return fn(scopes as { readonly [K in keyof TFactories]: ReturnType<TFactories[K]> });
+      }),
+    );
 }
