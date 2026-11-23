@@ -1,4 +1,4 @@
-Read-only mirror of `@arki/db` v0.5.1. Source and issues: arki-labs/arki. Docs: https://arki.dev/packages/db. Published 2026-11-02 with provenance https://www.npmjs.com/package/@arki/db/v/0.5.1#provenance.
+Read-only mirror of `@arki/db` v0.6.0. Source and issues: arki-labs/arki. Docs: https://arki.dev/packages/db. Published 2026-11-23 with provenance https://www.npmjs.com/package/@arki/db/v/0.6.0#provenance.
 
 # @arki/db
 
@@ -72,6 +72,16 @@ The combined Hermes smoke currently fails on rest-destructured parameters in the
 installed oRPC dependency. This is tracked as framework finding F35 for T11/T16.
 Use `test:runtimes --require-all` to expose the failure; a skipped Hermes leg is
 not evidence of support. Per-entry published-artifact proof remains separate.
+
+<!-- runtimes:start -->
+| Runtime | Result | Version tested | Date (UTC) |
+| --- | --- | --- | --- |
+| node | pass | v22.13.1 | 2026-11-05 |
+| bun | pass | 1.4.2 | 2026-11-05 |
+| deno | pass | 2.9.8 | 2026-11-05 |
+| browser | n/a | - | 2026-11-05 |
+| hermes | n/a | - | 2026-11-05 |
+<!-- runtimes:end -->
 
 ## Hosted Postgres
 
@@ -256,12 +266,12 @@ const userProjection = d.projection
 ### Branded IDs
 
 ```ts run
-import { createIdFactory, createPrefixedId } from '@arki/db/id';
+import { defineId } from '@arki/contracts';
+import { createPrefixedId } from '@arki/db/id';
 import { isFailure } from '@arki/failure';
 
 const userId = createPrefixedId('usr_'); // 'usr_…'
-const idFactory = createIdFactory('post_');
-const postId = idFactory.create();
+const postId = defineId('post_').create();
 
 if (isFailure(userId) || isFailure(postId)) throw new Error('This example needs Web Crypto');
 if (!userId.startsWith('usr_') || !postId.startsWith('post_')) throw new Error('prefix missing');
@@ -296,8 +306,8 @@ export const stories = pgTable('stories', {
 });
 ```
 
-`idColumns` has the same column helpers as `createIdFactory` (`primaryColumn`,
-`reference`, `foreignKey`, …), and stamps the declaration's schema on every
+`idColumns` gives the column helpers (`primaryColumn`, `reference`,
+`foreignKey`, …), and stamps the declaration's schema on every
 column so `@arki/contracts/drizzle` select schemas check the prefix at
 runtime. Existing prefixes stay exactly as stored: `defineId('hlgt_')` reads
 the `hlgt_…` rows already there. Never value-import `@arki/db/id` from browser
@@ -310,8 +320,7 @@ with `orThrow` at Drizzle's scalar default callback. A raw insert rejects with
 `UnexpectedFailure` and writes no row. Owned transactions roll back and return the
 original declared ID failure; `TRANSACTION_FAILURES` and `transactionErrorMap`
 include `ID_GENERATION_FAILURES`. Supplying an explicit ID skips its default.
-Legacy `createIdFactory` (`create`/`make`/`new`), `createId`, and `createPrefixedId`
-return the same canonical generation failures. They share the secure generator;
+`createId` and `createPrefixedId` return the same canonical generation failures. They share the secure generator;
 no producer falls back to `Math.random`. Their stored format remains a 24-character
 lowercase alphanumeric body starting with a letter, with the prefix concatenated
 exactly as supplied. Legacy empty and punctuation prefixes remain accepted.
@@ -943,14 +952,26 @@ migration remains framework T07; arbitrary exceptions stay owned defects.
 repository/query failures, initialization and pool lifecycle need their own typed
 ownership migration; this transaction change does not silently redefine them.
 
-### Transaction observability
+## Observability
 
-Existing `@arki/log` retry events record attempt, SQLSTATE and delay; the shared
-boundary records rollback and classified attempt outcomes under `arki:db:outcome`.
-Driver/query instrumentation remains responsible for database calls. No duplicate
-query spans or application SDK are installed. Default transaction-level spans,
-context propagation and telemetry-failure proofs remain tracked by framework T08;
-these logs alone do not claim complete A-36 coverage.
+Spans (OpenTelemetry API only, tracer `@arki/db`; nothing is exported until the app configures an SDK):
+
+| Span | When | Attributes |
+| --- | --- | --- |
+| `db.transaction` | each `runTransaction(...)`, all retries included; `transactionalProcedure` runs one per request | `failure.code` on a rolled-back outcome |
+| `db.transaction.once` | each single-attempt transaction: the Dot `transactions()` handle, a journal command | `failure.code` on failure |
+| `db.unit_of_work` | each `createUnitOfWork(...)` call | `failure.code` on failure |
+| `db.listen.start` | each `listenOnPool(...)` subscription start | `failure.code` on failure |
+| `db.migrations.read`, `db.migrations.pending`, `db.migrations.apply` | `readMigrations`, `pendingMigrations`, `migrateDb` | `failure.code` on failure |
+| `db.local.init`, `db.local.acquire`, `db.local.close` | `initDbRuntimeLocal`: open, owner lock, close | `failure.code` on failure |
+
+Only a fault (status 500 or higher) or a throw (`failure.unexpected_defect`) sets error status. Spans start under the active context: in a Dot app, a transaction a usecase opens nests under the `feature.<feature>.<usecase>` span. No span carries SQL, parameters, rows or connection strings.
+
+Metrics: `db.operations` (counter; `operation`, `failure.code`), `db.operation.duration` (histogram, seconds; same dimensions).
+
+`@arki/log` retry events record attempt, SQLSTATE and delay; the shared boundary records rollback and classified attempt outcomes under `arki:db:outcome`.
+
+Not instrumented: queries — the driver's instrumentation (`pg`, PGlite, libSQL) spans them, so `@arki/db` adds no duplicate query spans. Schema composition and keyset helpers are pure computation.
 
 ## Limits
 

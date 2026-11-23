@@ -1,6 +1,6 @@
 {
   "name": "@arki/db",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "Drizzle ORM repositories and database helpers for ARKI — Postgres + PGlite runtimes, projection builder, branded ID factory, and env-aware connection pooling.",
   "license": "MIT",
   "repository": {
@@ -180,14 +180,14 @@
     "package.json"
   ],
   "dependencies": {
-    "@arki/clock": "0.2.0",
-    "@arki/contracts": "0.4.1",
-    "@arki/date": "0.5.0",
-    "@arki/env": "0.2.0",
-    "@arki/failure": "0.3.0",
-    "@arki/log": "0.4.0",
-    "@arki/resilience": "0.3.2",
-    "@arki/schema": "0.3.0",
+    "@arki/clock": "0.2.1",
+    "@arki/contracts": "0.4.2",
+    "@arki/date": "0.5.2",
+    "@arki/env": "0.2.1",
+    "@arki/failure": "0.4.0",
+    "@arki/log": "0.4.1",
+    "@arki/resilience": "0.3.3",
+    "@arki/schema": "0.3.1",
     "@electric-sql/pglite": "^0.4.6",
     "@opentelemetry/api": "^1.9.1",
     "@paralleldrive/cuid2": "^3.3.0",
@@ -198,7 +198,7 @@
     "zod": "4.6.5"
   },
   "peerDependencies": {
-    "@arki/dot": "^0.10.0",
+    "@arki/dot": "^0.11.0",
     "@libsql/client": "^0.18.0",
     "@orpc/server": "^1.15.5",
     "@typescript-eslint/utils": "^8.0.0",
@@ -227,5 +227,12 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "arki": {
+    "runtimes": [
+      "node",
+      "bun",
+      "deno"
+    ]
   }
 }

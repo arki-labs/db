@@ -147,10 +147,10 @@
     "code": "db.listen_unavailable",
     "package": "@arki/db",
     "kind": "failure",
-    "what": "The first connection or `LISTEN` of a listener failed (no free client, permission denied, no `LISTEN` support). Nothing retries: the start rejects with an `UnexpectedFailure` whose `failure` is this value and whose `cause` is the raw pool error. (`WakeListener` in `@arki/journal` is `Unlisten | Promise<Unlisten>`, so the start cannot return a failure without changing that contract.)",
+    "what": "The first connection or `LISTEN` of a listener failed (no free client, permission denied, no `LISTEN` support). Nothing retries: the start resolves to this failure, with the raw pool error as its private `cause`. Only a listener that started reconnects on its own; after this one, call the start again.",
     "fix": "Check the pool, the credentials and that the server supports `LISTEN`, then start the listener again.",
     "verify": "bun run test -- src/pg-listen.test.ts",
-    "source": "src/pg-listen.ts:56"
+    "source": "src/pg-listen.ts:55"
   },
   {
     "code": "db.local_data_dir_in_use",

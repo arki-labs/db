@@ -1,5 +1,5 @@
 import { varchar } from 'drizzle-orm/pg-core';
-import { createIdBody, z } from '@arki/contracts';
+import { createIdBody } from '@arki/contracts';
 import { isFailure, orThrow } from '@arki/failure';
 import { tagColumnSchema } from './id-columns-shared.js';
 /** Generate an unprefixed legacy ID, or the canonical entropy failure. */
@@ -79,54 +79,6 @@ export function idColumns(id) {
         }),
     };
     return columns;
-}
-/**
- * Type-safe ID factory that generates all ID-related utilities at once
- *
- * New code: declare the id with `defineId('pt_')` from `@arki/contracts`
- * (browser-safe, type written once) and get its columns with
- * {@link idColumns}. This factory stays for the ids declared the old way.
- *
- * @deprecated The id type is derived from the prefix alone, so two kinds with the same prefix are
- * interchangeable. `defineId(prefix)` from `@arki/contracts` with {@link idColumns} gives each id its own type.
- *
- * @param prefix - The prefix for the ID type (e.g., 'pt', 'usr', 'ant')
- * @returns An object with create function, schema, and column helpers
- *
- * @example
- * ```typescript
- * const poetId = createIdFactory('pt');
- * export type PoetId = IdOf<typeof poetId>;
- *
- * export const createPoetId = poetId.create;
- * export const poetIdSchema = poetId.schema;
- *
- * export const poets = schema.table('poets', {
- *   id: poetId.primaryColumn(),
- *   // ... other columns
- * });
- * ```
- */
-export function createIdFactory(prefix) {
-    /** Validate the stored prefix while deriving the output type from that prefix alone. */
-    const schema = z.custom(value => typeof value === 'string' && value.startsWith(prefix));
-    const create = () => createPrefixedId(prefix);
-    return {
-        /**
-         * Creates a new ID with the specified prefix
-         */
-        create,
-        /**
-         * Creates a new ID with the specified prefix
-         */
-        make: create,
-        /**
-         * Creates a new ID with the specified prefix
-         */
-        new: create,
-        schema,
-        ...idColumns({ schema, create }),
-    };
 }
 // Re-export drizzle and zod utilities
 export * from 'drizzle-orm';

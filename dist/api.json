@@ -1,6 +1,6 @@
 {
   "package": "@arki/db",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "entries": [
     {
       "subpath": ".",
@@ -1320,13 +1320,6 @@
     },
     {
       "subpath": "./id",
-      "name": "createIdFactory",
-      "kind": "function",
-      "signature": "export declare function createIdFactory<TPrefix extends string>(prefix: TPrefix): { /** * Drizzle column helper for primary key columns * Automatically configures as varchar(256), not null, primary key, with proper type and default */ primaryColumn: (name?: string) => import(\"drizzle-orm/pg-core\").SetHasRuntimeDefault<import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").SetIsPrimaryKey<import(\"drizzle-orm/pg-core\").SetNotNull<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>>>, `${TPrefix}${string}`>>; optionalColumn: (name: string) => import(\"drizzle-orm/pg-core\").SetHasRuntimeDefault<import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>, `${TPrefix}${string}` | null>>; requiredColumn: (name: string) => import(\"drizzle-orm/pg-core\").SetHasRuntimeDefault<import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").SetNotNull<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>>, `${TPrefix}${string}`>>; /** * Drizzle column helper for foreign key reference columns * Configures as varchar(256), not null, with proper type (no default or primary key) */ reference: (name: string) => import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").SetNotNull<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>>, `${TPrefix}${string}`>; /** * Drizzle column helper for optional foreign key reference columns * Configures as varchar(256), nullable, with proper type */ optionalReference: (name: string) => import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>, `${TPrefix}${string}`>; /** * Drizzle column helper for foreign key reference with relation * Configures as varchar(256), not null, with proper type and foreign key constraint */ foreignKey: (name: string, referenceFn: () => PgColumn, options?: { onDelete?: OnDelete; } | undefined) => import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").SetNotNull<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>>, `${TPrefix}${string}`>; /** * Drizzle column helper for optional foreign key reference with relation * Configures as varchar(256), nullable, with proper type and foreign key constraint */ optionalForeignKey: (name: string, referenceFn: () => PgColumn, options?: { onDelete?: OnDelete; } | undefined) => import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>, `${TPrefix}${string}`>; /** * Creates a foreign key factory bound to a specific table * This allows creating multiple foreign keys to the same table without repeating the reference */ createForeignKeyFactory: (referenceFn: () => PgColumn) => { required: (name: string, options?: { onDelete?: OnDelete; } | undefined) => import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").SetNotNull<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>>, `${TPrefix}${string}`>; optional: (name: string, options?: { onDelete?: OnDelete; } | undefined) => import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>, `${TPrefix}${string}`>; }; /** * Creates a new ID with the specified prefix */ create: () => `${TPrefix}${string}` | IdGenerationFailure; /** * Creates a new ID with the specified prefix */ make: () => `${TPrefix}${string}` | IdGenerationFailure; /** * Creates a new ID with the specified prefix */ new: () => `${TPrefix}${string}` | IdGenerationFailure; schema: z.ZodType<`${TPrefix}${string}`, string, z.core.$ZodTypeInternals<`${TPrefix}${string}`, string>>; };",
-      "jsdocSummary": "Type-safe ID factory that generates all ID-related utilities at once"
-    },
-    {
-      "subpath": "./id",
       "name": "createInsertSchema",
       "kind": "variable",
       "signature": "declare const createInsertSchema: CreateInsertSchema<undefined>;",
@@ -1904,7 +1897,7 @@
       "name": "IdColumnSource",
       "kind": "type",
       "signature": "export type IdColumnSource<TId extends string> = { readonly schema: z.ZodType & z.core.$ZodType<TId>; readonly create: () => TId | IdGenerationFailure; };",
-      "jsdocSummary": "What the column helpers need from an id kind: its schema (stamped on every column, so `@arki/contracts/drizzle` schemas check the prefix at runtime) and its generator (the default of generated columns). `defineId('sty_')` from `@arki/contracts` has both, and so does {@link createIdFactory}."
+      "jsdocSummary": "What the column helpers need from an id kind: its schema (stamped on every column, so `@arki/contracts/drizzle` schemas check the prefix at runtime) and its generator (the default of generated columns). `defineId('sty_')` from `@arki/contracts` has both."
     },
     {
       "subpath": "./id",
@@ -3707,13 +3700,6 @@
     },
     {
       "subpath": "./id-factory",
-      "name": "createIdFactory",
-      "kind": "function",
-      "signature": "export declare function createIdFactory<TPrefix extends string>(prefix: TPrefix): { /** * Drizzle column helper for primary key columns * Automatically configures as varchar(256), not null, primary key, with proper type and default */ primaryColumn: (name?: string) => import(\"drizzle-orm/pg-core\").SetHasRuntimeDefault<import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").SetIsPrimaryKey<import(\"drizzle-orm/pg-core\").SetNotNull<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>>>, `${TPrefix}${string}`>>; optionalColumn: (name: string) => import(\"drizzle-orm/pg-core\").SetHasRuntimeDefault<import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>, `${TPrefix}${string}` | null>>; requiredColumn: (name: string) => import(\"drizzle-orm/pg-core\").SetHasRuntimeDefault<import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").SetNotNull<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>>, `${TPrefix}${string}`>>; /** * Drizzle column helper for foreign key reference columns * Configures as varchar(256), not null, with proper type (no default or primary key) */ reference: (name: string) => import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").SetNotNull<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>>, `${TPrefix}${string}`>; /** * Drizzle column helper for optional foreign key reference columns * Configures as varchar(256), nullable, with proper type */ optionalReference: (name: string) => import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>, `${TPrefix}${string}`>; /** * Drizzle column helper for foreign key reference with relation * Configures as varchar(256), not null, with proper type and foreign key constraint */ foreignKey: (name: string, referenceFn: () => PgColumn, options?: { onDelete?: OnDelete; } | undefined) => import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").SetNotNull<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>>, `${TPrefix}${string}`>; /** * Drizzle column helper for optional foreign key reference with relation * Configures as varchar(256), nullable, with proper type and foreign key constraint */ optionalForeignKey: (name: string, referenceFn: () => PgColumn, options?: { onDelete?: OnDelete; } | undefined) => import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>, `${TPrefix}${string}`>; /** * Creates a foreign key factory bound to a specific table * This allows creating multiple foreign keys to the same table without repeating the reference */ createForeignKeyFactory: (referenceFn: () => PgColumn) => { required: (name: string, options?: { onDelete?: OnDelete; } | undefined) => import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").SetNotNull<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>>, `${TPrefix}${string}`>; optional: (name: string, options?: { onDelete?: OnDelete; } | undefined) => import(\"drizzle-orm/pg-core\").Set$Type<import(\"drizzle-orm/pg-core\").PgVarcharBuilder<[string, ...string[]]>, `${TPrefix}${string}`>; }; /** * Creates a new ID with the specified prefix */ create: () => `${TPrefix}${string}` | IdGenerationFailure; /** * Creates a new ID with the specified prefix */ make: () => `${TPrefix}${string}` | IdGenerationFailure; /** * Creates a new ID with the specified prefix */ new: () => `${TPrefix}${string}` | IdGenerationFailure; schema: z.ZodType<`${TPrefix}${string}`, string, z.core.$ZodTypeInternals<`${TPrefix}${string}`, string>>; };",
-      "jsdocSummary": "Type-safe ID factory that generates all ID-related utilities at once"
-    },
-    {
-      "subpath": "./id-factory",
       "name": "createInsertSchema",
       "kind": "variable",
       "signature": "declare const createInsertSchema: CreateInsertSchema<undefined>;",
@@ -4291,7 +4277,7 @@
       "name": "IdColumnSource",
       "kind": "type",
       "signature": "export type IdColumnSource<TId extends string> = { readonly schema: z.ZodType & z.core.$ZodType<TId>; readonly create: () => TId | IdGenerationFailure; };",
-      "jsdocSummary": "What the column helpers need from an id kind: its schema (stamped on every column, so `@arki/contracts/drizzle` schemas check the prefix at runtime) and its generator (the default of generated columns). `defineId('sty_')` from `@arki/contracts` has both, and so does {@link createIdFactory}."
+      "jsdocSummary": "What the column helpers need from an id kind: its schema (stamped on every column, so `@arki/contracts/drizzle` schemas check the prefix at runtime) and its generator (the default of generated columns). `defineId('sty_')` from `@arki/contracts` has both."
     },
     {
       "subpath": "./id-factory",
@@ -8749,8 +8735,8 @@
       "subpath": "./pg",
       "name": "listenOnPool",
       "kind": "function",
-      "signature": "export declare function listenOnPool(pool: ListenPool, channel: string, options?: ListenOptions): (onMessage: (payload: string) => void) => Promise<() => Promise<void>>;",
-      "jsdocSummary": "Hear `channel` on a dedicated client of `pool`. It resolves with the function that stops it, the shape of the journal's `WakeListener`: `journal.worker(db, { listen: listenOnPool(listenPool, journal.wakeChannel) })`. The first connection is made when listening starts; if it fails, the start rejects. Stop closes the client instead of handing it back: its handlers stay on it, and a reused client would run them for a stopped listener."
+      "signature": "export declare function listenOnPool(pool: ListenPool, channel: string, options?: ListenOptions): (onMessage: (payload: string) => void) => Promise<(() => Promise<void>) | ReturnType<typeof ListenUnavailable>>;",
+      "jsdocSummary": "Hear `channel` on a dedicated client of `pool`. It resolves with the function that stops it, the shape of the journal's `WakeListener`: `journal.worker(db, { listen: listenOnPool(listenPool, journal.wakeChannel) })`. The first connection is made when listening starts; if it or its `LISTEN` fails, the start resolves to {@link ListenUnavailable} instead (a throwing `onState` is only logged). Stop closes the client instead of handing it back: its handlers stay on it, and a reused client would run them for a stopped listener."
     },
     {
       "subpath": "./pg",
@@ -8771,7 +8757,7 @@
       "name": "ListenUnavailable",
       "kind": "variable",
       "signature": "export declare const ListenUnavailable: import(\"@arki/failure\").FailureDefinition<\"db.listen_unavailable\", undefined>;",
-      "jsdocSummary": "The first connection or `LISTEN` of a listener failed (no free client, permission denied, no `LISTEN` support). Nothing retries: the start rejects with an `UnexpectedFailure` whose `failure` is this value and whose `cause` is the raw pool error. (`WakeListener` in `@arki/journal` is `Unlisten | Promise<Unlisten>`, so the start cannot return a failure without changing that contract.)"
+      "jsdocSummary": "The first connection or `LISTEN` of a listener failed (no free client, permission denied, no `LISTEN` support). Nothing retries: the start resolves to this failure, with the raw pool error as its private `cause`. Only a listener that started reconnects on its own; after this one, call the start again."
     },
     {
       "subpath": "./pg",

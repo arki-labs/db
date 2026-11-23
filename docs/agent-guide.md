@@ -43,7 +43,7 @@ See [Ambiguous commit recovery](#ambiguous-commit-recovery).
 1. Declare the id in a browser-safe file with `defineId('sty_')` from `@arki/contracts`.
 2. Build the columns with `idColumns(storyId)` from `@arki/db/id`.
 3. Reuse `storyId.schema` in table validator refinements for precise branded output. The metadata enforces runtime prefixes; Drizzle discards its static schema type.
-4. Legacy `createIdFactory(prefix)` derives successful IDs from its schema; infer stored types with `IdOf<typeof factory>`, never the now-fallible generator's `ReturnType`. `create`/`make`/`new`, `createId` and `createPrefixedId` return canonical `IdGenerationFailure`. Prefixes and accepted stored suffixes stay unchanged, including empty/punctuation prefixes. All producers use the same secure Web Crypto sampler; there is no `Math.random` fallback. See [legacy ID failures](upgrades/legacy-id-failures.md).
+4. Infer stored ID types with `IdOf<typeof storyId>`, never the fallible generator's `ReturnType`. `createId` and `createPrefixedId` return canonical `IdGenerationFailure`. Prefixes and accepted stored suffixes stay unchanged, including empty/punctuation prefixes. All producers use the same secure Web Crypto sampler; there is no `Math.random` fallback. See [legacy ID failures](upgrades/legacy-id-failures.md).
 5. JSON storage uses `jsonColumn(name, storageSchema)` from `@arki/contracts/drizzle`. Apply wire codecs only in explicit insert refinements, then store parsed output; select validates the stable storage schema.
 6. `defineId().create()` returns an ID or `IdGenerationFailure`; narrow direct calls before passing them as values. Generated primary/required defaults bridge failures with `orThrow` because Drizzle requires a scalar. Raw inserts reject with `UnexpectedFailure`; owned transactions restore declared generation failures by identity after rollback. Explicit IDs bypass generation. `TRANSACTION_FAILURES` includes `ID_GENERATION_FAILURES`, so native transaction error maps cover these outcomes.
 
@@ -188,10 +188,11 @@ cannot replace an outcome or repeat a migration. Raw paths, SQL, names and priva
 causes stay out of spans. These operations do not cancel an in-flight driver call;
 configure native driver timeouts and await its outcome before deciding recovery.
 
-Existing retry logs and `arki:db:outcome` classified attempt logs are the scoped
-observability surface. Driver query instrumentation owns query spans. Default
-transaction spans, propagation and failing-telemetry proof remain T08 work; do not
-claim full A-36 coverage from logs alone.
+Transactions have default spans: `db.transaction` (`runTransaction`, all retries),
+`db.transaction.once` (single attempt) and `db.unit_of_work`. They start under the
+active context, so in a Dot app they nest under the usecase span. Retry logs and
+`arki:db:outcome` classified attempt logs add attempt detail. Driver query
+instrumentation owns query spans. The README `## Observability` lists every span.
 
 ## Errors
 
@@ -268,7 +269,7 @@ Never silence it with an alias or `as`: the effect still runs twice.
 - `onState('ready')` runs after every successful `LISTEN`. `onState('disconnected')` runs once per lost client: an `error`, an `end`, or a `select 1` health check with no answer within `healthMs`.
 - A lost client is released once (destroyed, never reused) and replaced every `retryMs`. Notifications sent in between are lost. Treat `disconnected` as a gap.
 - Stop runs `UNLISTEN` and closes the client. It never hands it back: its handlers stay on it.
-- If the first connection or `LISTEN` fails, the start rejects with an `UnexpectedFailure` whose `failure` is `ListenUnavailable` (`db.listen_unavailable`; the raw pool error is its `cause`) and nothing retries. A throwing `onState` observer is logged at DEBUG and never rejects the start or drops the client.
+- If the first connection or `LISTEN` fails, the start resolves to `ListenUnavailable` (`db.listen_unavailable`; the raw pool error is its private `cause`) and nothing retries: call the start again. A throwing `onState` observer is logged at DEBUG and never fails the start or drops the client.
 - Tests: `src/pg-listen.test.ts` (scripted pool), `src/pg-listen.pg.test.ts` (Postgres 16).
 
 ## Verify

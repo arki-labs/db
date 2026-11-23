@@ -1,5 +1,5 @@
 import { context, metrics, ROOT_CONTEXT, SpanStatusCode, trace } from '@opentelemetry/api';
-import { isFailure, UnexpectedDefect } from '@arki/failure';
+import { isFailure, isFault, UnexpectedDefect } from '@arki/failure';
 /** Application-owned reporting cannot change resource ownership or its outcome. */
 function report(observe) {
     try {
@@ -28,19 +28,21 @@ export async function observeDbOperation(name, run) {
     });
     const started = performance.now();
     let code;
-    const failed = (failure) => {
+    // Every failure sets `failure.code`; only a fault (a throw, or a returned 5xx) sets error status.
+    const failed = (failure, fault) => {
         code = failure;
         report(() => span?.setAttribute('failure.code', failure));
-        report(() => span?.setStatus({ code: SpanStatusCode.ERROR }));
+        if (fault)
+            report(() => span?.setStatus({ code: SpanStatusCode.ERROR }));
     };
     try {
         const result = await execute();
         if (isFailure(result))
-            failed(result.code);
+            failed(result.code, isFault(result));
         return result;
     }
     catch (error) {
-        failed(UnexpectedDefect.code);
+        failed(UnexpectedDefect.code, true);
         throw error;
     }
     finally {
@@ -98,7 +100,8 @@ export function observeDbSyncOperation(name, run) {
         const result = execute();
         if (isFailure(result)) {
             report(() => span?.setAttribute('failure.code', result.code));
-            report(() => span?.setStatus({ code: SpanStatusCode.ERROR }));
+            if (isFault(result))
+                report(() => span?.setStatus({ code: SpanStatusCode.ERROR }));
         }
         return result;
     }

@@ -23,9 +23,8 @@ export type ListenOptions = {
 };
 /**
  * The first connection or `LISTEN` of a listener failed (no free client, permission denied, no `LISTEN` support).
- * Nothing retries: the start rejects with an `UnexpectedFailure` whose `failure` is this value and whose
- * `cause` is the raw pool error. (`WakeListener` in `@arki/journal` is `Unlisten | Promise<Unlisten>`, so the
- * start cannot return a failure without changing that contract.)
+ * Nothing retries: the start resolves to this failure, with the raw pool error as its private `cause`. Only a
+ * listener that started reconnects on its own; after this one, call the start again.
  * @fix Check the pool, the credentials and that the server supports `LISTEN`, then start the listener again.
  * @verify bun run test -- src/pg-listen.test.ts
  */
@@ -34,9 +33,10 @@ export declare const ListenUnavailable: import("@arki/failure").FailureDefinitio
  * Hear `channel` on a dedicated client of `pool`. It resolves with the function that
  * stops it, the shape of the journal's `WakeListener`:
  * `journal.worker(db, { listen: listenOnPool(listenPool, journal.wakeChannel) })`.
- * The first connection is made when listening starts; if it fails, the start rejects.
+ * The first connection is made when listening starts; if it or its `LISTEN` fails, the
+ * start resolves to {@link ListenUnavailable} instead (a throwing `onState` is only logged).
  * Stop closes the client instead of handing it back: its handlers stay on it, and a
  * reused client would run them for a stopped listener.
  */
-export declare function listenOnPool(pool: ListenPool, channel: string, options?: ListenOptions): (onMessage: (payload: string) => void) => Promise<() => Promise<void>>;
+export declare function listenOnPool(pool: ListenPool, channel: string, options?: ListenOptions): (onMessage: (payload: string) => void) => Promise<(() => Promise<void>) | ReturnType<typeof ListenUnavailable>>;
 //# sourceMappingURL=pg-listen.d.ts.map
